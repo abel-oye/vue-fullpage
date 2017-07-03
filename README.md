@@ -1,14 +1,14 @@
  fullpage-vue
  ====
 
-README：[中文版](https://github.com/river-lee/fullpage-vue/blob/master/README_CN.md)
+README：[中文版](https://github.com/river-lee/fullpage-vue/blob/master/README_zh.md)
 > A sigle-page scroll plugin based on vue@2.x,support for mobile and PC .
 
 ## overview
 To achieve sigle-page scroll in mobile, support horizontal scroll and vertical scroll, support all the animation instructions of animate.css.
 
 ## Online demo
-here's a [jsfiddle demo](https://jsfiddle.net/wendaosanshou/4b6p5ujt/12/)
+here's a [jsfiddle demo](https://jsfiddle.net/e23jiang/6jc3okaq/1/)
 
 ## Installation
 ```
@@ -30,7 +30,7 @@ Import the plugin of css and js file in main.js
 
 ```js
 import 'animate.css'
-import 'fullpage-vue/fullpage-vue.css'
+import 'fullpage-vue/src/fullpage.css'
 import VueFullpage from 'fullpage-vue'
 Vue.use(VueFullpage)
 ```

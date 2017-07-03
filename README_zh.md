@@ -3,6 +3,7 @@ fullpage-vue
 一个基于vue2.x fullpage 插件 支持移动端和pc端
 
 ## 在线demo
+[jsfiddle demo](https://jsfiddle.net/e23jiang/6jc3okaq/1/)
 
 ## 安装
 ```
@@ -15,7 +16,7 @@ npm install animate.css --save
 [animate.css用法](https://daneden.github.io/animate.css/)
 
 ## 文档
-[api文档](https://github.com/wendaosanshou/fullpage-vue/blob/master/doc/api_cn.md)
+[api文档](https://github.com/river-lee/fullpage-vue/blob/master/docs/api.md)
 
 ## 快速上手
 
@@ -23,7 +24,7 @@ npm install animate.css --save
 在main.js需要引入该插件的css和js文件
 
 ```js
-import 'fullpage-vue/fullpage-vue.css'
+import 'fullpage-vue/src/fullpage.css'
 import VueFullpage from 'fullpage-vue'
 Vue.use(VueFullpage)
 ```
