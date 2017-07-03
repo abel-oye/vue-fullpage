@@ -37,18 +37,24 @@
 		  padding-top: 50px;
 		  background: #aabbcc;
 		}
+		h3,p{
+			font-size: 2em;
+		}
 	</style>
 	<div id="app">
 	  <template>
 	    <div class="fullpage-container">
 	      <div class="fullpage-wp" v-fullpage="opts">
 	        <div class="page-1 page">
-	          <p class="part-1" v-animate="{value: 'bounceInLeft'}">vue-fullpage</p>
+	          <h1 class="part-1" v-animate="{value: 'bounceInLeft'}">vue-fullpage.js</h1>
+	          <h3 class="" v-animate="{value: 'bounceInLeft'}">A sigle-page scroll plugin based on vue@2.x,support for mobile and PC .</h3>
 	        </div>
 	        <div class="page-2 page">
-	          <p class="part-2" v-animate="{value: 'bounceInRight'}">vue-fullpage</p>
+	          <h2 class="part-2" v-animate="{value: 'bounceInRight'}">Easy to use plugin</h2>
 	        </div>
 	        <div class="page-3 page">
+	        	<h2 class="" v-animate="{value: 'bounceInTop'}">Working On Tablets</h2>
+	        	<h3 class=""  v-animate="{value: 'bounceInBotton'}">Designed to fit different screen sizes as well as tablet and mobile devices. </h3>
 	          <p class="part-3" v-animate="{value: 'bounceInLeft', delay: 0}">vue-fullpage</p>
 	          <p class="part-3" v-animate="{value: 'bounceInRight', delay: 300}">vue-fullpage</p>
 	          <p class="part-3" v-animate="{value: 'bounceInDown', delay: 600}">vue-fullpage</p>

@@ -1,5 +1,4 @@
- fullpage-vue
- ====
+# fullpage-vue
 
 README：[中文版](https://github.com/river-lee/fullpage-vue/blob/master/README_zh.md)
 > A sigle-page scroll plugin based on vue@2.x,support for mobile and PC .

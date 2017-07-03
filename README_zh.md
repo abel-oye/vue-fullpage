@@ -1,5 +1,5 @@
-fullpage-vue
-====
+# fullpage-vue
+
 一个基于vue2.x fullpage 插件 支持移动端和pc端
 
 ## 在线demo

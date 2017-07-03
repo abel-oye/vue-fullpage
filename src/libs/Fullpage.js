@@ -62,7 +62,8 @@ class Fullpage {
 		}, delay)
 	}
 	removeAnimated(el, animate) {
-		if (el.getAttribute('class').indexOf('animated') > -1) {
+		const cls = el.getAttribute('class');
+		if (cls && cls.indexOf('animated') > -1) {
 			el.classList.remove(animate.value)
 		}
 	}
