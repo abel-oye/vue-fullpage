@@ -23,6 +23,15 @@ npm install animate.css --save
 ## Document
 [api document](https://github.com/river-lee/fullpage-vue/blob/master/doc/api.md)
 
+- `start` : (default:`0`) Display first page
+- `duration` : (default:`500`) 
+- `loop` : (default:`false`) 
+- `dir` : (default:`v`) Direction of movement
+- `der` : (default:`0.1`) 
+- `movingFlag` : (default:`false`) 
+- `beforeChange` : (default:`function`) Before change callback
+- `afterChange` : (default:`function`) After change callback
+
 ## getting started
 
 #### main.js

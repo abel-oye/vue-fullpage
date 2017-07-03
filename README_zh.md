@@ -17,6 +17,14 @@ npm install animate.css --save
 
 ## 文档
 [api文档](https://github.com/river-lee/fullpage-vue/blob/master/docs/api.md)
+- `start` : (default:`0`) 默认显示那一页
+- `duration` : (default:`500`) 
+- `loop` : (default:`false`) 
+- `dir` : (default:`v`) 运动的方向 `v` 垂直 和 `h` 水平
+- `der` : (default:`0.1`) 
+- `movingFlag` : (default:`false`) 
+- `beforeChange` : (default:`function`) 页面切换前回调
+- `afterChange` : (default:`function`) 页面切换后回调
 
 ## 快速上手
 
@@ -55,7 +63,7 @@ Vue.use(VueFullpage)
 
 **js**
 
-``fullpage-vue``的值请参考[api文档](https://github.com/wendaosanshou/fullpage-vue/blob/master/doc/api_cn.md)
+``fullpage-vue``的值请参考[api文档](https://github.com/river-lee/fullpage-vue/blob/master/doc/api_cn.md)
 ```js
 export default {
   data() {

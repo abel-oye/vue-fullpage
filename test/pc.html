@@ -5,12 +5,18 @@
 	<title>vue fullpage</title>
 </head>
 <body>
+	<link rel="stylesheet" type="text/css" href="http://unpkg.com/animate.css@3.5.2">
+	<link rel="stylesheet" type="text/css" href="../src/fullpage.css">
 	<style type="text/css" media="screen">
-		@import url("http://unpkg.com/animate.css@3.5.2");
-		@import url("http://unpkg.com/vue-fullpage@2.0.0/vue-fullpage.css");
+		body{
+			margin: 0;
+		}
 		.fullpage-container {
-		  width: 300px;
-		  height: 450px;
+		 	position: absolute;
+		 	left: 0;
+		 	top: 0;
+		 	width: 100%;
+		 	height: 100%;
 		  
 		}
 		.page {
@@ -32,8 +38,6 @@
 		  background: #aabbcc;
 		}
 	</style>
-	<script src="http://unpkg.com/vue/dist/vue.js"></script>
-	<script src="../dist/fullpage.js"></script>
 	<div id="app">
 	  <template>
 	    <div class="fullpage-container">
@@ -54,6 +58,8 @@
 	    </div>
 	  </template>
 	</div>
+	<script src="http://unpkg.com/vue/dist/vue.js"></script>
+	<script src="../dist/fullpage.js"></script>
 	<script>
 		var Main = {
 		    data () {
