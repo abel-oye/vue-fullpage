@@ -314,21 +314,27 @@ Fullpage.defaultOptions = {
 
 var fullpage = {
 	install: function install(Vue, options) {
-		var that = new Fullpage();
 		Vue.directive('fullpage', {
 			inserted: function inserted(el, binding, vnode) {
 				var opts = binding.value || {};
-
+				var that = new Fullpage();
+				el.$fullpage = that;
 				that.init(el, opts, vnode);
 			},
 			componentUpdated: function componentUpdated(el, binding, vnode) {
 				var opts = binding.value || {};
+				var that = el.$fullpage;
 				that.init(el, opts, vnode);
 			}
 		});
 
 		Vue.directive('animate', {
 			inserted: function inserted(el, binding, vnode) {
+				var that;
+				if (!el.$fullpage) {
+					that = new Fullpage();
+					el.$fullpage = that;
+				}
 				if (binding.value) {
 					that.initAnimate(el, binding, vnode);
 				}

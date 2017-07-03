@@ -38,13 +38,13 @@
 		  background: #aabbcc;
 		}
 		h3,p{
-			font-size: 2em;
+		    font-size: 16px;
 		}
 	</style>
 	<div id="app">
 	  <template>
 	    <div class="fullpage-container">
-	      <div class="fullpage-wp" v-fullpage="opts">
+	      <div class="fullpage-wp" v-fullpage="opts" ref="fullpage">
 	        <div class="page-1 page">
 	          <h1 class="part-1" v-animate="{value: 'bounceInLeft'}">vue-fullpage.js</h1>
 	          <h3 class="" v-animate="{value: 'bounceInLeft'}">A sigle-page scroll plugin based on vue@2.x,support for mobile and PC .</h3>
@@ -86,7 +86,7 @@
 		    }
 		  }
 		var Ctor = Vue.extend(Main)
-		new Ctor().$mount('#app')
+		var app = new Ctor().$mount('#app')
 	</script>
 </body>
 </html>
