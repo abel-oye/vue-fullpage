@@ -22,6 +22,8 @@ npm install animate.css --save
 ## Document
 [api document](https://github.com/river-lee/fullpage-vue/blob/master/doc/api.md)
 
+### options
+
 - `start` : (default:`0`) Display first page
 - `duration` : (default:`500`) 
 - `loop` : (default:`false`) 
@@ -30,6 +32,11 @@ npm install animate.css --save
 - `movingFlag` : (default:`false`) 
 - `beforeChange` : (default:`function`) Before change callback
 - `afterChange` : (default:`function`) After change callback
+
+### method
+- `moveTo` : Move to the specified page
+- `movePrev`: Move to the previous page
+- `moveNext`: Move to the next page
 
 ## getting started
 
@@ -52,7 +59,7 @@ Add the ``v-fullpage`` command to the ``page-wp`` container.
 Add the ``v-animate`` command to the ``page`` container.
 ```html
 <div class="fullpage-container">
-  <div class="fullpage-wp" v-fullpage="opts">
+  <div class="fullpage-wp" v-fullpage="opts" ref="example">
     <div class="page-1 page">
       <p class="part-1" v-animate="{value: 'bounceInLeft'}">fullpage-vue</p>
     </div>
@@ -84,6 +91,11 @@ export default {
         afterChange: function (prev, next) {
         }
       }
+    }
+  },
+  method:{
+    moveNext(){
+      this.$refs.example.$fullpage.moveNext(); //Move to the next page
     }
   }
 }

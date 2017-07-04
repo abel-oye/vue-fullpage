@@ -17,6 +17,9 @@ npm install animate.css --save
 
 ## 文档
 [api文档](https://github.com/river-lee/fullpage-vue/blob/master/docs/api.md)
+
+### 选项
+
 - `start` : (default:`0`) 默认显示那一页
 - `duration` : (default:`500`) 
 - `loop` : (default:`false`) 
@@ -25,6 +28,11 @@ npm install animate.css --save
 - `movingFlag` : (default:`false`) 
 - `beforeChange` : (default:`function`) 页面切换前回调
 - `afterChange` : (default:`function`) 页面切换后回调
+
+### method
+- `moveTo` : 移动到指定页面
+- `movePrev`: 移动到上一个页面
+- `moveNext`: 移动到下一个页面
 
 ## 快速上手
 
@@ -45,7 +53,7 @@ Vue.use(VueFullpage)
 在``page``容器上加``v-animate``指令,``v-animate``的值是``animate.css``的动画效果
 ```html
 <div class="fullpage-container">
-  <div class="fullpage-wp" v-fullpage="opts">
+  <div class="fullpage-wp" v-fullpage="opts" ref="example">
     <div class="page-1 page">
       <p class="part-1" v-animate="{value: 'bounceInLeft'}">fullpage-vue</p>
     </div>
@@ -73,6 +81,11 @@ export default {
         dir: 'v',
         duration: 500
       }
+    }
+  },
+  method:{
+    moveNext(){
+      this.$refs.example.$fullpage.moveNext(); //Move to the next page
     }
   }
 }

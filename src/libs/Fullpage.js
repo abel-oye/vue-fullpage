@@ -213,10 +213,10 @@ class Fullpage {
 
 		}, that.opts.duration)
 	}
-	slidePrev(){
+	movePrev(){
 		this.moveTo(this.curIndex-1,true);
 	}
-	slideNext(){
+	moveNext(){
 		this.moveTo(this.curIndex+1,true);
 	}
 }
