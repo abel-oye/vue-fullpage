@@ -1,31 +1,24 @@
 import FullPage from "./libs/Fullpage";
+import Animate from "./libs/Animate";
 
 let fullpage =  {
 	install: (Vue, options) => {
 		Vue.directive('fullpage', {
-			inserted: function(el, binding, vnode) {
+			inserted: (el, binding, vnode)=>{
 				var opts = binding.value || {}
-				var that = new FullPage();
-				el.$fullpage = that;
-				that.init(el, opts, vnode)
+				el.$fullpage = new FullPage(el, opts, vnode);
 			},
-			componentUpdated: function(el, binding, vnode) {
+			componentUpdated: (el, binding, vnode)=>{
 				var opts = binding.value || {};
 				var that  = el.$fullpage;
-				that.init(el, opts, vnode)
+				that.setOptions(opts);
 			}
 		})
 
 		Vue.directive('animate', {
-			inserted: function(el, binding, vnode) {
-				var that;
-				if(!el.$fullpage){
-				 that =  new FullPage();
-				 el.$fullpage = that;
-				}
-				if (binding.value) {
-					that.initAnimate(el, binding, vnode)
-				}
+			inserted: (el, binding, vnode)=>{
+				let opts = binding || {};
+				el.$animate = new Animate(el, opts, vnode);				
 			}
 		})
 	}
