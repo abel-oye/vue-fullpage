@@ -66,6 +66,7 @@ Vue.use(VueFullpage)
       <p class="part-3" v-animate="{value: 'zoomInDown', delay: 1200}">fullpage-vue</p>
     </div>
   </div>
+  <button @click="moveNext">next</button>
 </div>
 ```
 

@@ -45,6 +45,8 @@ function broadcast(children, eventName, params) {
 
 var Fullpage = function () {
 	function Fullpage(el, options, vnode) {
+		var _this = this;
+
 		classCallCheck(this, Fullpage);
 
 		var that = this;
@@ -69,17 +71,11 @@ var Fullpage = function () {
 		this.initScrollDirection();
 
 		this.initEvent(el);
-		window.setTimeout(function () {
-			that.width = that.opts.width || that.parentEle.offsetWidth;
-			that.height = that.opts.height || that.parentEle.offsetHeight;
 
-			for (var i = 0; i < that.pageEles.length; i++) {
-				var pageEle = that.pageEles[i];
-				pageEle.setAttribute('data-id', i);
-				pageEle.classList.add('page');
-				pageEle.style.width = that.width + 'px';
-				pageEle.style.height = that.height + 'px';
-			}
+		window.setTimeout(function () {
+
+			_this.resize();
+
 			//如果是一页 则不移动 直接触发动画
 			if (that.curIndex == 0) {
 				that.toogleAnimate(that.curIndex);
@@ -90,6 +86,20 @@ var Fullpage = function () {
 	}
 
 	createClass(Fullpage, [{
+		key: 'resize',
+		value: function resize() {
+			this.width = this.opts.width || this.parentEle.offsetWidth;
+			this.height = this.opts.height || this.parentEle.offsetHeight;
+
+			for (var i = 0; i < this.pageEles.length; i++) {
+				var pageEle = this.pageEles[i];
+				pageEle.setAttribute('data-id', i);
+				pageEle.classList.add('page');
+				//pageEle.style.width = this.width + 'px'
+				pageEle.style.height = this.height + 'px';
+			}
+		}
+	}, {
 		key: 'setOptions',
 		value: function setOptions(options) {
 			this.assignOpts(options, this.opts);
@@ -121,6 +131,8 @@ var Fullpage = function () {
 	}, {
 		key: 'initEvent',
 		value: function initEvent(el) {
+			var _this2 = this;
+
 			var that = this;
 			that.prevIndex = that.curIndex;
 
@@ -174,10 +186,25 @@ var Fullpage = function () {
 
 					that.moveTo(curIndex, true);
 				});
+
+				var debounceTimer = void 0,
+				    interval = 1200,
+				    debounce = true;
 				addEventListener(el, 'mousewheel', function (e) {
+					console.log('mousewheel');
 					if (that.opts.movingFlag) {
 						return false;
 					}
+					if (!debounce) {
+						return;
+					}
+
+					debounce = false;
+					clearTimeout(debounceTimer);
+					debounceTimer = setTimeout(function () {
+						debounce = true;
+					}, interval);
+
 					var preIndex = that.curIndex;
 					var dir = that.opts.dir;
 					var sub = dir === 'v' ? e.deltaY : e.deltaX;
@@ -188,6 +215,17 @@ var Fullpage = function () {
 					that.moveTo(curIndex, true);
 				});
 			}
+
+			addEventListener(el, 'webkitTransitionEnd', function () {
+				that.opts.afterChange(that.prevIndex, that.nextIndex);
+				that.opts.movingFlag = false;
+			});
+
+			addEventListener(window, 'resize', function () {
+				if (el.offsetHeight != that.height) {
+					_this2.resize();
+				}
+			});
 		}
 	}, {
 		key: 'move',
@@ -204,7 +242,7 @@ var Fullpage = function () {
 	}, {
 		key: 'moveTo',
 		value: function moveTo(curIndex, anim) {
-			var _this = this;
+			var _this3 = this;
 
 			var that = this;
 			if (Math.min(Math.max(curIndex, 0), that.total) == that.curIndex) {
@@ -242,28 +280,27 @@ var Fullpage = function () {
 			that.move(dist);
 
 			var afterChange = function afterChange() {
-				that.opts.movingFlag = false;
 				that.opts.afterChange(that.prevIndex, that.nextIndex);
+				that.opts.movingFlag = false;
 			};
 
 			window.setTimeout(function () {
 				that.prevIndex = curIndex;
-				_this.toogleAnimate(curIndex);
+				_this3.toogleAnimate(curIndex);
 
 				if (!anim) {
 					afterChange();
 				}
-				addEventListener(that.el, 'webkitTransitionEnd', afterChange);
 			}, that.opts.duration);
 		}
 	}, {
-		key: 'slidePrev',
-		value: function slidePrev() {
+		key: 'movePrev',
+		value: function movePrev() {
 			this.moveTo(this.curIndex - 1, true);
 		}
 	}, {
-		key: 'slideNext',
-		value: function slideNext() {
+		key: 'moveNext',
+		value: function moveNext() {
 			this.moveTo(this.curIndex + 1, true);
 		}
 	}]);

@@ -38,17 +38,11 @@ class Fullpage {
 		this.initScrollDirection();
 
 		this.initEvent(el);
-		window.setTimeout(()=>{
-			that.width = that.opts.width || that.parentEle.offsetWidth
-			that.height = that.opts.height || that.parentEle.offsetHeight
 
-			for (var i = 0; i < that.pageEles.length; i++) {
-				var pageEle = that.pageEles[i]
-				pageEle.setAttribute('data-id', i)
-				pageEle.classList.add('page')
-				pageEle.style.width = that.width + 'px'
-				pageEle.style.height = that.height + 'px'
-			}
+		window.setTimeout(()=>{
+			
+			this.resize();
+
 			//如果是一页 则不移动 直接触发动画
 			if(that.curIndex == 0){
 				that.toogleAnimate(that.curIndex)
@@ -58,6 +52,18 @@ class Fullpage {
 			
 		}, 0)
 		
+	}
+	resize(){
+		this.width = this.opts.width || this.parentEle.offsetWidth
+		this.height = this.opts.height || this.parentEle.offsetHeight
+
+		for (var i = 0; i < this.pageEles.length; i++) {
+			var pageEle = this.pageEles[i]
+			pageEle.setAttribute('data-id', i)
+			pageEle.classList.add('page')
+			//pageEle.style.width = this.width + 'px'
+			pageEle.style.height = this.height + 'px'
+		}
 	}
 	setOptions(options){
 		this.assignOpts(options,this.opts);
@@ -134,10 +140,26 @@ class Fullpage {
 
 				that.moveTo(curIndex,true);
 			});
+
+			let debounceTimer,
+				interval = 1200,
+				debounce = true;
 			addEventListener(el, 'mousewheel', function(e) {
+				console.log('mousewheel')
 				if (that.opts.movingFlag) {
 					return false;
 				}
+				if(!debounce){
+					return;
+				}
+
+				debounce = false;
+				clearTimeout(debounceTimer);
+				debounceTimer = setTimeout(()=>{
+					debounce = true;
+				},interval);
+
+				
 				var preIndex = that.curIndex;
 				var dir = that.opts.dir;
 				var sub = dir === 'v' ? e.deltaY : e.deltaX;
@@ -148,6 +170,17 @@ class Fullpage {
 				that.moveTo(curIndex,true);
 			});
 		}
+
+		addEventListener(el, 'webkitTransitionEnd',()=>{
+			that.opts.afterChange(that.prevIndex, that.nextIndex)
+			that.opts.movingFlag = false;
+		});
+
+		addEventListener(window,'resize',()=>{
+			if(el.offsetHeight != that.height){
+				this.resize();
+			}
+		})
 
 	}
 	move(dist) {
@@ -198,8 +231,8 @@ class Fullpage {
 		that.move(dist);
 
 		const afterChange = ()=>{
-			that.opts.movingFlag = false;
 			that.opts.afterChange(that.prevIndex, that.nextIndex)
+			that.opts.movingFlag = false;
 		}
 
 		window.setTimeout(()=>{
@@ -208,9 +241,7 @@ class Fullpage {
 
 			if (!anim) {
 				afterChange();
-			}
-			addEventListener(that.el, 'webkitTransitionEnd',afterChange);
-
+			}			
 		}, that.opts.duration)
 	}
 	movePrev(){
