@@ -6,7 +6,7 @@
 	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1">
 </head>
 <body>
-	<link rel="stylesheet" type="text/css" href="http://unpkg.com/animate.css@3.5.2">
+	<link rel="stylesheet" type="text/css" href="//unpkg.com/animate.css@3.5.2">
 	<link rel="stylesheet" type="text/css" href="../src/fullpage.css">
 	<style type="text/css" media="screen">
 		body{
@@ -32,7 +32,7 @@
 		}
 		.page-2 {
 		  padding-top: 100px;
-		  background: #000000;
+		      background-color: rgb(75, 191, 195);
 		}
 		.page-3 {
 		  padding-top: 50px;
@@ -41,10 +41,37 @@
 		h3,p{
 		    font-size: 16px;
 		}
+		.button-group{
+			position: absolute;
+			top: 30px;
+			left: 30px;
+			z-index: 9;
+		}
+		.button-group button{
+			display: inline-block;
+			margin: 10px;
+			color: #000;
+			background: #fff;
+			background: rgba(255,255,255,.5);
+			-webkit-border-radius: 10px;
+			border-radius: 10px;
+			padding: 9px 18px;
+			border: none;
+			outline: none;
+		}
+		.button-group button.active{
+			background: rgba(0,0,0,.5);
+			    color: #fff;
+		}
 	</style>
 	<div id="app">
 	  <template>
 	    <div class="fullpage-container">
+	      <div class="button-group">
+	      		<button type="button" :class="{active:index ==0}" @click="moveTo(0)">first page</button>
+	      		<button type="button" :class="{active:index ==1}" @click="moveTo(1)">Second page</button>
+	      		<button type="button" :class="{active:index ==2}" @click="moveTo(2)">Third page</button>
+	      </div>
 	      <div class="fullpage-wp" v-fullpage="opts" ref="fullpage">
 	        <div class="page-1 page">
 	          <h1 class="part-1" v-animate="{value: 'bounceInLeft'}">vue-fullpage.js</h1>
@@ -65,12 +92,14 @@
 	    </div>
 	  </template>
 	</div>
-	<script src="http://unpkg.com/vue/dist/vue.js"></script>
+	<script src="//unpkg.com/vue/dist/vue.js"></script>
 	<script src="../dist/fullpage.js"></script>
 	<script>
 		var Main = {
 		    data () {
+		   		var that = this;
 		      return {
+		      	index:0,
 		        opts: {
 		          start: 0,
 		          dir: 'v',
@@ -78,12 +107,18 @@
 		          duration: 300,
 		          beforeChange: function (prev, next) {
 		            console.log('before', prev, next)
+		            that.index = next;
 		          },
 		          afterChange: function (prev, next) {
 		            console.log('after', prev, next)
 		          }
 		        }
 		      };
+		    },
+		    methods:{
+		    	moveTo:function(index){
+		    		this.$refs.fullpage.$fullpage.moveTo(index,true);
+		    	}
 		    }
 		  }
 		var Ctor = Vue.extend(Main)

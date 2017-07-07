@@ -88,8 +88,8 @@ var Fullpage = function () {
 	createClass(Fullpage, [{
 		key: 'resize',
 		value: function resize() {
-			this.width = this.opts.width || this.parentEle.offsetWidth;
-			this.height = this.opts.height || this.parentEle.offsetHeight;
+			this.width = this.opts.width || this.el.offsetWidth;
+			this.height = this.opts.height || this.el.offsetHeight;
 
 			for (var i = 0; i < this.pageEles.length; i++) {
 				var pageEle = this.pageEles[i];
