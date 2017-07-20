@@ -144,7 +144,11 @@ class Fullpage {
 			let debounceTimer,
 				interval = 1200,
 				debounce = true;
-			addEventListener(el, 'mousewheel', function(e) {
+
+			// fixed firefox DOMMouseScroll closed #1.
+			let mousewheelType = document.mozFullScreen !== undefined ? 'DOMMouseScroll' : 'mousewheel';
+
+			addEventListener(el, mousewheelType, function(e) {
 				console.log('mousewheel')
 				if (that.opts.movingFlag) {
 					return false;
@@ -160,12 +164,20 @@ class Fullpage {
 				},interval);
 
 				
-				var preIndex = that.curIndex;
-				var dir = that.opts.dir;
-				var sub = dir === 'v' ? e.deltaY : e.deltaX;
-				var der = sub > that.opts.der ? 1 : sub < -that.opts.der ? -1 : 0;
+				let preIndex = that.curIndex;
+				let dir = that.opts.dir;
 
-				var curIndex = der + that.curIndex;
+				// 兼容 DOMMouseScroll event.detail 
+				if(!e.wheelDelta){
+					e.deltaY = e.detail;
+					e.deltaX = e.detail;
+				}
+
+				let sub = dir === 'v' ? e.deltaY : e.deltaX;
+
+				let der = sub > 0 ? 1 : sub < 0 ? -1 : 0;
+
+				let curIndex = der + that.curIndex;
 
 				that.moveTo(curIndex,true);
 			});

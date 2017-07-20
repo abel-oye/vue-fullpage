@@ -8,6 +8,7 @@ To achieve sigle-page scroll in mobile, support horizontal scroll and vertical s
 
 ## Online demo
 here's a [jsfiddle demo](https://jsfiddle.net/e23jiang/6jc3okaq/1/)
+[Live demo](https://river-lee.github.io/vue-fullpage/test)
 
 ## Installation
 ```
