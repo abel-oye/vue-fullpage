@@ -35,10 +35,18 @@ npm install animate.css --save
 - `afterChange` : (default:`function`) After change callback
 
 ### method
-- `moveTo` : Move to the specified page
-- `movePrev`: Move to the previous page
-- `moveNext`: Move to the next page
-- `$upadte`: Update the dom structure,for example `v-for` and `v-if` Affect the number of pages, need to manually call `$update`
+
+#### moveTo
+Move to the specified page
+
+#### movePrev
+Move to the previous page
+
+#### moveNext
+ Move to the next page
+
+#### $upadte
+Update the dom structure,for example `v-for` and `v-if` Affect the number of pages, need to manually call `$update`
 
 ```html
   <button type="button" 
@@ -46,7 +54,7 @@ npm install animate.css --save
     :class="{active:index == btn + 2}" 
     @click="moveTo(btn+2)">page {{btn+2}}</button>
   <button type="button" @click="showPage()">add page</button>
-  
+
   <div class="page-2 page" v-for="page in pageNum">
     <h2 class="part-2" v-animate="{value: 'bounceInRight'}">page {{page}}</h2>
   </div>

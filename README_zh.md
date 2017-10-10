@@ -30,10 +30,14 @@ npm install animate.css --save
 - `afterChange` : (default:`function`) 页面切换后回调
 
 ### method
-- `moveTo` : 移动到指定页面
-- `movePrev`: 移动到上一个页面
-- `moveNext`: 移动到下一个页面
-- `$upadte`: 改变Dom的结构，需要调用更新。例如：通过`v-for`和`v-if`影响page的数量都需要调用`$update`更新。
+#### moveTo 
+ 移动到指定页面
+#### movePrev
+ 移动到上一个页面
+#### moveNext
+ 移动到下一个页面
+#### $upadte
+ 改变Dom的结构，需要调用更新。例如：通过`v-for`和`v-if`影响page的数量都需要调用`$update`更新。
 
 ```html
   <button type="button" 
