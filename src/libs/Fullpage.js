@@ -262,6 +262,11 @@ class Fullpage {
 	moveNext(){
 		this.moveTo(this.curIndex+1,true);
 	}
+	update(){
+		this.pageEles = this.el.children;
+		this.total = this.pageEles.length;
+		this.resize();
+	}
 }
 
 

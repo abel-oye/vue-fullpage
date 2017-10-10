@@ -71,6 +71,11 @@
 	      		<button type="button" :class="{active:index ==0}" @click="moveTo(0)">first page</button>
 	      		<button type="button" :class="{active:index ==1}" @click="moveTo(1)">Second page</button>
 	      		<button type="button" :class="{active:index ==2}" @click="moveTo(2)">Third page</button>
+	      		<button type="button" 
+	      			v-for="btn in pageNum"
+	      			:class="{active:index == btn + 2}" 
+	      			@click="moveTo(btn+2)">page {{btn+2}}</button>
+	      		<button type="button" @click="showPage()">add page</button>
 	      </div>
 	      <div class="fullpage-wp" v-fullpage="opts" ref="fullpage">
 	        <div class="page-1 page">
@@ -88,6 +93,9 @@
 	          <p class="part-3" v-animate="{value: 'bounceInDown', delay: 600}">vue-fullpage</p>
 	          <p class="part-3" v-animate="{value: 'zoomInDown', delay: 900}">vue-fullpage</p>
 	        </div>
+	        <div class="page-2 page" v-for="page in pageNum">
+	        	<h2 class="part-2" v-animate="{value: 'bounceInRight'}">page {{page}}</h2>
+	        </div>
 	      </div>
 	    </div>
 	  </template>
@@ -100,6 +108,7 @@
 		   		var that = this;
 		      return {
 		      	index:0,
+		      	pageNum:0,
 		        opts: {
 		          start: 0,
 		          dir: 'v',
@@ -118,6 +127,10 @@
 		    methods:{
 		    	moveTo:function(index){
 		    		this.$refs.fullpage.$fullpage.moveTo(index,true);
+		    	},
+		    	showPage:function(){
+	    			this.pageNum ++;
+	    			this.$refs.fullpage.$fullpage.$update();
 		    	}
 		    }
 		  }

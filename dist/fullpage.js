@@ -315,6 +315,13 @@ var Fullpage = function () {
 		value: function moveNext() {
 			this.moveTo(this.curIndex + 1, true);
 		}
+	}, {
+		key: 'update',
+		value: function update() {
+			this.pageEles = this.el.children;
+			this.total = this.pageEles.length;
+			this.resize();
+		}
 	}]);
 	return Fullpage;
 }();
@@ -386,6 +393,12 @@ var fullpage = {
 			inserted: function inserted(el, binding, vnode) {
 				var opts = binding.value || {};
 				el.$fullpage = new Fullpage(el, opts, vnode);
+
+				el.$fullpage.$update = function () {
+					Vue.nextTick(function () {
+						el.$fullpage.update();
+					});
+				};
 			},
 			componentUpdated: function componentUpdated(el, binding, vnode) {
 				var opts = binding.value || {};
