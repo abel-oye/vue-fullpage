@@ -1,7 +1,7 @@
 {
   "name": "fullpage-vue",
-  "version": "1.4.1",
-  "description": "vue fullpage rollup  ",
+  "version": "1.4.2",
+  "description": "vue 2.x fullpage rollup  ",
   "main": "./dist/fullpage.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

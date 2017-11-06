@@ -6,6 +6,7 @@ let fullpage =  {
 		Vue.directive('fullpage', {
 			inserted: (el, binding, vnode)=>{
 				var opts = binding.value || {}
+
 				el.$fullpage = new FullPage(el, opts, vnode);
 
 				el.$fullpage.$update = function(){
@@ -15,6 +16,7 @@ let fullpage =  {
 				}
 			},
 			componentUpdated: (el, binding, vnode)=>{
+				
 				var opts = binding.value || {};
 				var that  = el.$fullpage;
 				that.setOptions(opts);

@@ -32,318 +32,333 @@ var createClass = function () {
  * vue2.x fullpage
  */
 function broadcast(children, eventName, params) {
-	children && children.forEach(function (child) {
-		var context = child.context;
+    children && children.forEach(function (child) {
+        var context = child.context;
 
-		if (context) {
-			context.$emit.apply(context, [eventName].concat(params));
-		}
+        if (context) {
+            context.$emit.apply(context, [eventName].concat(params));
+        }
 
-		broadcast(child.children, eventName, params);
-	});
+        broadcast(child.children, eventName, params);
+    });
 }
 
 var Fullpage = function () {
-	function Fullpage(el, options, vnode) {
-		var _this = this;
+    function Fullpage(el, options, vnode) {
+        var _this = this;
 
-		classCallCheck(this, Fullpage);
+        classCallCheck(this, Fullpage);
 
-		var that = this;
-		this.assignOpts(options);
+        var that = this;
+        this.assignOpts(options);
 
-		this.vnode = vnode;
-		this.vm = vnode.context;
-		this.curIndex = this.opts.start;
+        this.vnode = vnode;
+        this.vm = vnode.context;
+        this.curIndex = this.opts.start;
 
-		this.startY = 0;
-		this.opts.movingFlag = false;
+        this.startY = 0;
+        this.opts.movingFlag = false;
 
-		this.el = el;
-		this.el.classList.add('fullpage-wp');
+        this.el = el;
+        this.el.classList.add('fullpage-wp');
 
-		this.parentEle = this.el.parentNode;
-		this.parentEle.classList.add('fullpage-container');
+        this.parentEle = this.el.parentNode;
+        this.parentEle.classList.add('fullpage-container');
 
-		this.pageEles = this.el.children;
-		this.total = this.pageEles.length;
+        this.pageEles = this.el.children;
+        this.total = this.pageEles.length;
 
-		this.initScrollDirection();
+        this.initScrollDirection();
 
-		this.initEvent(el);
+        this.initEvent(el);
 
-		window.setTimeout(function () {
+        window.setTimeout(function () {
 
-			_this.resize();
+            _this.resize();
 
-			//如果是一页 则不移动 直接触发动画
-			if (that.curIndex == 0) {
-				that.toogleAnimate(that.curIndex);
-			} else {
-				that.moveTo(that.curIndex, false);
-			}
-		}, 0);
-	}
+            //如果是一页 则不移动 直接触发动画
+            if (that.curIndex == 0) {
+                that.toogleAnimate(that.curIndex);
+            } else {
+                that.moveTo(that.curIndex, false);
+            }
+        }, 0);
+    }
 
-	createClass(Fullpage, [{
-		key: 'resize',
-		value: function resize() {
-			this.width = this.opts.width || this.el.offsetWidth;
-			this.height = this.opts.height || this.el.offsetHeight;
+    createClass(Fullpage, [{
+        key: 'resize',
+        value: function resize() {
+            this.width = this.opts.width || this.el.offsetWidth;
+            this.height = this.opts.height || this.el.offsetHeight;
 
-			for (var i = 0; i < this.pageEles.length; i++) {
-				var pageEle = this.pageEles[i];
-				pageEle.setAttribute('data-id', i);
-				pageEle.classList.add('page');
-				//pageEle.style.width = this.width + 'px'
-				pageEle.style.height = this.height + 'px';
-			}
-		}
-	}, {
-		key: 'setOptions',
-		value: function setOptions(options) {
-			this.assignOpts(options, this.opts);
-		}
-	}, {
-		key: 'toogleAnimate',
-		value: function toogleAnimate(curIndex) {
-			broadcast(this.vnode.children, 'toogle.animate', curIndex);
-		}
-	}, {
-		key: 'assignOpts',
-		value: function assignOpts(opts, o) {
-			o = o || Fullpage.defaultOptions;
-			opts = opts || {};
-			for (var key in opts) {
-				if (opts.hasOwnProperty(key)) {
-					o[key] = opts[key];
-				}
-			}
-			this.opts = o;
-		}
-	}, {
-		key: 'initScrollDirection',
-		value: function initScrollDirection() {
-			if (this.opts.dir !== 'v') {
-				this.el.classList.add('fullpage-wp-h');
-			}
-		}
-	}, {
-		key: 'initEvent',
-		value: function initEvent(el) {
-			var _this2 = this;
+            for (var i = 0; i < this.pageEles.length; i++) {
+                var pageEle = this.pageEles[i];
+                pageEle.setAttribute('data-id', i);
+                pageEle.classList.add('page');
+                //pageEle.style.width = this.width + 'px'
+                pageEle.style.height = this.height + 'px';
+            }
+        }
+    }, {
+        key: 'setOptions',
+        value: function setOptions(options) {
+            this.assignOpts(options, this.opts);
+        }
+    }, {
+        key: 'toogleAnimate',
+        value: function toogleAnimate(curIndex) {
+            broadcast(this.vnode.children, 'toogle.animate', curIndex);
+        }
+    }, {
+        key: 'assignOpts',
+        value: function assignOpts(opts, o) {
+            o = o || Fullpage.defaultOptions;
+            opts = opts || {};
+            for (var key in opts) {
+                if (opts.hasOwnProperty(key)) {
+                    o[key] = opts[key];
+                }
+            }
+            this.opts = o;
+        }
+    }, {
+        key: 'initScrollDirection',
+        value: function initScrollDirection() {
+            if (this.opts.dir !== 'v') {
+                this.el.classList.add('fullpage-wp-h');
+            }
+        }
+    }, {
+        key: 'initEvent',
+        value: function initEvent(el) {
+            var _this2 = this;
 
-			var that = this;
-			that.prevIndex = that.curIndex;
+            var that = this;
+            that.prevIndex = that.curIndex;
 
-			if ("ontouchstart" in document) {
-				/// touch ///
-				el.addEventListener('touchstart', function (e) {
-					if (that.opts.movingFlag) {
-						return false;
-					}
-					that.startX = e.targetTouches[0].pageX;
-					that.startY = e.targetTouches[0].pageY;
-				});
-				el.addEventListener('touchend', function (e) {
-					if (that.opts.movingFlag) {
-						return false;
-					}
-					var preIndex = that.curIndex;
-					var dir = that.opts.dir;
-					var sub = dir === 'v' ? (e.changedTouches[0].pageY - that.startY) / that.height : (e.changedTouches[0].pageX - that.startX) / that.width;
-					var der = sub > that.opts.der ? -1 : sub < -that.opts.der ? 1 : 0;
+            if ("ontouchstart" in document) {
+                document.addEventListener('touchmove', function (e) {
+                    e.preventDefault();
+                    return false;
+                }, false);
 
-					var curIndex = der + that.curIndex;
+                /// touch ///
+                el.addEventListener('touchstart', function (e) {
+                    if (that.opts.movingFlag) {
+                        return false;
+                    }
+                    that.startX = e.targetTouches[0].pageX;
+                    that.startY = e.targetTouches[0].pageY;
+                }, false);
 
-					that.moveTo(curIndex, true);
-				});
-			} else {
+                el.addEventListener('touchend', function (e) {
+                    e.preventDefault();
+                    if (that.opts.movingFlag) {
+                        return false;
+                    }
 
-				var isMousedown = false;
-				addEventListener(el, 'mousedown', function (e) {
-					if (that.opts.movingFlag) {
-						return false;
-					}
-					isMousedown = true;
-					that.startX = e.pageX;
-					that.startY = e.pageY;
-				});
-				addEventListener(el, 'mouseup', function (e) {
-					isMousedown = false;
-				});
-				addEventListener(el, 'mousemove', function (e) {
-					e.preventDefault();
-					if (that.opts.movingFlag || !isMousedown) {
-						return false;
-					}
-					var preIndex = that.curIndex;
-					var dir = that.opts.dir;
-					var sub = dir === 'v' ? (e.pageY - that.startY) / that.height : (e.pageX - that.startX) / that.width;
-					var der = sub > that.opts.der ? -1 : sub < -that.opts.der ? 1 : 0;
+                    var preIndex = that.curIndex;
+                    var dir = that.opts.dir;
+                    var sub = dir === 'v' ? (e.changedTouches[0].pageY - that.startY) / that.height : (e.changedTouches[0].pageX - that.startX) / that.width;
+                    var der = sub > that.opts.der ? -1 : sub < -that.opts.der ? 1 : 0;
 
-					var curIndex = der + that.curIndex;
+                    var curIndex = der + that.curIndex;
 
-					that.moveTo(curIndex, true);
-				});
+                    that.moveTo(curIndex, true);
+                }, false);
+            } else {
 
-				var debounceTimer = void 0,
-				    interval = 1200,
-				    debounce = true;
+                var isMousedown = false;
+                addEventListener(el, 'mousedown', function (e) {
+                    if (that.opts.movingFlag) {
+                        return false;
+                    }
+                    isMousedown = true;
+                    that.startX = e.pageX;
+                    that.startY = e.pageY;
+                });
 
-				// fixed firefox DOMMouseScroll closed #1.
-				var mousewheelType = document.mozFullScreen !== undefined ? 'DOMMouseScroll' : 'mousewheel';
+                addEventListener(el, 'mouseup', function (e) {
+                    isMousedown = false;
+                });
 
-				addEventListener(el, mousewheelType, function (e) {
-					console.log('mousewheel');
-					if (that.opts.movingFlag) {
-						return false;
-					}
-					if (!debounce) {
-						return;
-					}
+                addEventListener(el, 'mousemove', function (e) {
+                    e.preventDefault();
+                    if (that.opts.movingFlag || !isMousedown) {
+                        return false;
+                    }
+                    var preIndex = that.curIndex;
+                    var dir = that.opts.dir;
+                    var sub = dir === 'v' ? (e.pageY - that.startY) / that.height : (e.pageX - that.startX) / that.width;
+                    var der = sub > that.opts.der ? -1 : sub < -that.opts.der ? 1 : 0;
 
-					debounce = false;
-					clearTimeout(debounceTimer);
-					debounceTimer = setTimeout(function () {
-						debounce = true;
-					}, interval);
+                    var curIndex = der + that.curIndex;
 
-					var preIndex = that.curIndex;
-					var dir = that.opts.dir;
+                    that.moveTo(curIndex, true);
+                });
 
-					// 兼容 DOMMouseScroll event.detail 
-					if (!e.wheelDelta) {
-						e.deltaY = e.detail;
-						e.deltaX = e.detail;
-					}
+                var debounceTimer = void 0,
+                    interval = 1200,
+                    debounce = true;
 
-					var sub = dir === 'v' ? e.deltaY : e.deltaX;
+                // fixed firefox DOMMouseScroll closed #1.
+                var mousewheelType = document.mozFullScreen !== undefined ? 'DOMMouseScroll' : 'mousewheel';
 
-					var der = sub > 0 ? 1 : sub < 0 ? -1 : 0;
+                addEventListener(el, mousewheelType, function (e) {
+                    console.log('mousewheel');
+                    if (that.opts.movingFlag) {
+                        return false;
+                    }
+                    if (!debounce) {
+                        return;
+                    }
 
-					var curIndex = der + that.curIndex;
+                    debounce = false;
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(function () {
+                        debounce = true;
+                    }, interval);
 
-					that.moveTo(curIndex, true);
-				});
-			}
+                    var preIndex = that.curIndex;
+                    var dir = that.opts.dir;
 
-			addEventListener(el, 'webkitTransitionEnd', function () {
-				that.opts.afterChange(that.prevIndex, that.nextIndex);
-				that.opts.movingFlag = false;
-			});
+                    // 兼容 DOMMouseScroll event.detail 
+                    if (!e.wheelDelta) {
+                        e.deltaY = e.detail;
+                        e.deltaX = e.detail;
+                    }
 
-			addEventListener(window, 'resize', function () {
-				if (el.offsetHeight != that.height) {
-					_this2.resize();
-				}
-			});
-		}
-	}, {
-		key: 'move',
-		value: function move(dist) {
-			var xPx = '0px',
-			    yPx = '0px';
-			if (this.opts.dir === 'v') {
-				yPx = dist + 'px';
-			} else {
-				xPx = dist + 'px';
-			}
-			this.el.style.cssText += ';-webkit-transform : translate3d(' + xPx + ', ' + yPx + ', 0px);' + 'transform : translate3d(' + xPx + ', ' + yPx + ', 0px);';
-		}
-	}, {
-		key: 'moveTo',
-		value: function moveTo(curIndex, anim) {
-			var _this3 = this;
+                    var sub = dir === 'v' ? e.deltaY : e.deltaX;
 
-			var that = this;
-			if (Math.min(Math.max(curIndex, 0), that.total) == that.curIndex) {
-				return;
-			}
-			if (curIndex >= 0 && curIndex < that.total) {
-				//that.moveTo(that.curIndex)
-				this.curIndex = curIndex;
-			} else {
-				if (!!that.opts.loop) {
-					curIndex = that.curIndex = curIndex < 0 ? that.total - 1 : 0;
-				} else {
-					that.curIndex = curIndex < 0 ? 0 : that.total - 1;
-					return;
-				}
-			}
+                    var der = sub > 0 ? 1 : sub < 0 ? -1 : 0;
 
-			var dist = that.opts.dir === 'v' ? curIndex * -that.height : curIndex * -that.width;
-			that.nextIndex = curIndex;
-			that.opts.movingFlag = true;
+                    var curIndex = der + that.curIndex;
 
-			//beforeChange 返回false取消本次的滑动
-			var flag = that.opts.beforeChange(that.prevIndex, that.nextIndex);
-			if (flag === false) {
-				that.opts.movingFlag = false;
-				return false;
-			}
+                    that.moveTo(curIndex, true);
+                });
+            }
 
-			if (anim) {
-				that.el.classList.add('anim');
-			} else {
-				that.el.classList.remove('anim');
-			}
+            addEventListener(el, 'webkitTransitionEnd', function () {
+                that.opts.afterChange(that.prevIndex, that.nextIndex);
+                that.opts.movingFlag = false;
+            });
 
-			that.move(dist);
+            addEventListener(window, 'resize', function () {
+                if (el.offsetHeight != that.height) {
+                    _this2.resize();
+                }
+            });
+        }
+    }, {
+        key: 'move',
+        value: function move(dist) {
+            var xPx = '0px',
+                yPx = '0px';
+            if (this.opts.dir === 'v') {
+                yPx = dist + 'px';
+            } else {
+                xPx = dist + 'px';
+            }
+            this.el.style.cssText += ';-webkit-transform : translate3d(' + xPx + ', ' + yPx + ', 0px);' + 'transform : translate3d(' + xPx + ', ' + yPx + ', 0px);';
+        }
+    }, {
+        key: 'moveTo',
+        value: function moveTo(curIndex, anim) {
+            var _this3 = this;
 
-			var afterChange = function afterChange() {
-				that.opts.afterChange(that.prevIndex, that.nextIndex);
-				that.opts.movingFlag = false;
-			};
+            var that = this;
+            if (Math.min(Math.max(curIndex, 0), that.total) == that.curIndex) {
+                return;
+            }
+            if (curIndex >= 0 && curIndex < that.total) {
+                //that.moveTo(that.curIndex)
+                this.curIndex = curIndex;
+            } else {
+                if (!!that.opts.loop) {
+                    curIndex = that.curIndex = curIndex < 0 ? that.total - 1 : 0;
+                } else {
+                    that.curIndex = curIndex < 0 ? 0 : that.total - 1;
+                    return;
+                }
+            }
 
-			window.setTimeout(function () {
-				that.prevIndex = curIndex;
-				_this3.toogleAnimate(curIndex);
+            var dist = that.opts.dir === 'v' ? curIndex * -that.height : curIndex * -that.width;
+            that.nextIndex = curIndex;
+            that.opts.movingFlag = true;
 
-				if (!anim) {
-					afterChange();
-				}
-			}, that.opts.duration);
-		}
-	}, {
-		key: 'movePrev',
-		value: function movePrev() {
-			this.moveTo(this.curIndex - 1, true);
-		}
-	}, {
-		key: 'moveNext',
-		value: function moveNext() {
-			this.moveTo(this.curIndex + 1, true);
-		}
-	}, {
-		key: 'update',
-		value: function update() {
-			this.pageEles = this.el.children;
-			this.total = this.pageEles.length;
-			this.resize();
-		}
-	}]);
-	return Fullpage;
+            //beforeChange 返回false取消本次的滑动
+            var flag = that.opts.beforeChange(that.prevIndex, that.nextIndex);
+            if (flag === false) {
+                that.opts.movingFlag = false;
+                return false;
+            }
+
+            if (anim) {
+                that.el.classList.add('anim');
+            } else {
+                that.el.classList.remove('anim');
+            }
+
+            that.move(dist);
+
+            var afterChange = function afterChange() {
+                that.opts.afterChange(that.prevIndex, that.nextIndex);
+                that.opts.movingFlag = false;
+            };
+
+            window.setTimeout(function () {
+                that.prevIndex = curIndex;
+                _this3.toogleAnimate(curIndex);
+
+                if (!anim) {
+                    afterChange();
+                }
+            }, that.opts.duration);
+        }
+    }, {
+        key: 'movePrev',
+        value: function movePrev() {
+            this.moveTo(this.curIndex - 1, true);
+        }
+    }, {
+        key: 'moveNext',
+        value: function moveNext() {
+            this.moveTo(this.curIndex + 1, true);
+        }
+    }, {
+        key: 'update',
+        value: function update() {
+            this.pageEles = this.el.children;
+            this.total = this.pageEles.length;
+            this.resize();
+        }
+    }, {
+        key: 'destroy',
+        value: function destroy() {}
+    }]);
+    return Fullpage;
 }();
 
 function addEventListener(el, eventName, callback, isBubble) {
-	if (el.addEventListener) {
-		el.addEventListener(eventName, callback, !!isBubble);
-	} else {
-		el.attachEvent('on' + eventName, callback, !!isBubble);
-	}
+    if (el.addEventListener) {
+        el.addEventListener(eventName, callback, !!isBubble);
+    } else {
+        el.attachEvent('on' + eventName, callback, !!isBubble);
+    }
 }
 
 Fullpage.defaultOptions = {
-	start: 0,
-	duration: 500,
-	loop: false,
-	dir: 'v',
-	der: 0.1,
-	movingFlag: false,
-	beforeChange: function beforeChange(data) {},
-	afterChange: function afterChange(data) {}
+    start: 0,
+    duration: 500,
+    loop: false,
+    dir: 'v',
+    der: 0.1,
+    movingFlag: false,
+    beforeChange: noop,
+    afterChange: noop
 };
+
+function noop() {}
 
 var Animate = function () {
 	function Animate(el, binding, vnode) {
@@ -392,6 +407,7 @@ var fullpage = {
 		Vue.directive('fullpage', {
 			inserted: function inserted(el, binding, vnode) {
 				var opts = binding.value || {};
+
 				el.$fullpage = new Fullpage(el, opts, vnode);
 
 				el.$fullpage.$update = function () {
@@ -401,6 +417,7 @@ var fullpage = {
 				};
 			},
 			componentUpdated: function componentUpdated(el, binding, vnode) {
+
 				var opts = binding.value || {};
 				var that = el.$fullpage;
 				that.setOptions(opts);
