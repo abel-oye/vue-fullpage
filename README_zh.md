@@ -16,7 +16,6 @@ npm install animate.css --save
 [animate.css用法](https://daneden.github.io/animate.css/)
 
 ## 文档
-[api文档](https://github.com/river-lee/fullpage-vue/blob/master/docs/api.md)
 
 ### 选项
 
@@ -95,7 +94,7 @@ Vue.use(VueFullpage)
 
 **js**
 
-``fullpage-vue``的值请参考[api文档](https://github.com/river-lee/fullpage-vue/blob/master/doc/api_cn.md)
+``fullpage-vue``的值请参考[api文档](https://github.com/river-lee/vue-fullpage#options)
 ```js
 export default {
   data() {

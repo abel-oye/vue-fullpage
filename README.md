@@ -21,7 +21,6 @@ npm install animate.css --save
 [animate.css usage](https://daneden.github.io/animate.css/)
 
 ## Document
-[api document](https://github.com/river-lee/fullpage-vue/blob/master/doc/api.md)
 
 ### options
 
@@ -107,7 +106,7 @@ Add the ``v-animate`` command to the ``page`` container.
 
 **script**
 
-``fullpage-vue`` value please refer to [api document](https://github.com/river-lee/fullpage-vue/blob/master/doc/api.md)
+``fullpage-vue`` value please refer to [api document](https://github.com/river-lee/vue-fullpage#options)
 ```js
 export default {
   data() {
