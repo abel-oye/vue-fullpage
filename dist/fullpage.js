@@ -205,7 +205,6 @@ var Fullpage = function () {
                 var mousewheelType = document.mozFullScreen !== undefined ? 'DOMMouseScroll' : 'mousewheel';
 
                 addEventListener(el, mousewheelType, function (e) {
-                    console.log('mousewheel');
                     if (that.opts.movingFlag) {
                         return false;
                     }
@@ -239,8 +238,9 @@ var Fullpage = function () {
             }
 
             addEventListener(el, 'webkitTransitionEnd', function () {
-                that.opts.afterChange(that.prevIndex, that.nextIndex);
-                that.opts.movingFlag = false;
+                _this2.toogleAnimate(_this2.curIndex);
+                _this2.opts.afterChange.call(_this2, _this2.pageEles[_this2.curIndex], _this2.curIndex);
+                _this2.opts.movingFlag = false;
             });
 
             addEventListener(window, 'resize', function () {
@@ -270,10 +270,7 @@ var Fullpage = function () {
             if (Math.min(Math.max(curIndex, 0), that.total) == that.curIndex) {
                 return;
             }
-            if (curIndex >= 0 && curIndex < that.total) {
-                //that.moveTo(that.curIndex)
-                this.curIndex = curIndex;
-            } else {
+            if (!(curIndex >= 0 && curIndex < that.total)) {
                 if (!!that.opts.loop) {
                     curIndex = that.curIndex = curIndex < 0 ? that.total - 1 : 0;
                 } else {
@@ -282,17 +279,16 @@ var Fullpage = function () {
                 }
             }
 
-            var dist = that.opts.dir === 'v' ? curIndex * -that.height : curIndex * -that.width;
-            that.nextIndex = curIndex;
-            that.opts.movingFlag = true;
-
             //beforeChange 返回false取消本次的滑动
-            var flag = that.opts.beforeChange(that.prevIndex, that.nextIndex);
+            var flag = that.opts.beforeChange.call(that, that.pageEles[this.curIndex], this.curIndex, curIndex);
             if (flag === false) {
-                that.opts.movingFlag = false;
                 return false;
             }
 
+            var dist = that.opts.dir === 'v' ? curIndex * -that.height : curIndex * -that.width;
+            this.curIndex = curIndex;
+
+            that.opts.movingFlag = true;
             if (anim) {
                 that.el.classList.add('anim');
             } else {
@@ -302,18 +298,16 @@ var Fullpage = function () {
             that.move(dist);
 
             var afterChange = function afterChange() {
-                that.opts.afterChange(that.prevIndex, that.nextIndex);
+                that.opts.afterChange.call(that, that.pageEles[_this3.curIndex], _this3.curIndex, curIndex);
                 that.opts.movingFlag = false;
             };
 
-            window.setTimeout(function () {
-                that.prevIndex = curIndex;
-                _this3.toogleAnimate(curIndex);
-
-                if (!anim) {
-                    afterChange();
-                }
-            }, that.opts.duration);
+            // window.setTimeout(() => {
+            //     this.toogleAnimate(curIndex)
+            //     if (!anim) {
+            //         afterChange();
+            //     }
+            // }, that.opts.duration)
         }
     }, {
         key: 'movePrev',

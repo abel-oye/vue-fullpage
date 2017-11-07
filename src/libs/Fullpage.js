@@ -159,7 +159,6 @@ class Fullpage {
             let mousewheelType = document.mozFullScreen !== undefined ? 'DOMMouseScroll' : 'mousewheel';
 
             addEventListener(el, mousewheelType, e => {
-                console.log('mousewheel')
                 if (that.opts.movingFlag) {
                     return false;
                 }
@@ -194,8 +193,9 @@ class Fullpage {
         }
 
         addEventListener(el, 'webkitTransitionEnd', () => {
-            that.opts.afterChange(that.prevIndex, that.nextIndex)
-            that.opts.movingFlag = false;
+            this.toogleAnimate(this.curIndex)
+            this.opts.afterChange.call(this, this.pageEles[this.curIndex], this.curIndex)
+            this.opts.movingFlag = false;
         });
 
         addEventListener(window, 'resize', () => {
@@ -217,14 +217,11 @@ class Fullpage {
             'transform : translate3d(' + xPx + ', ' + yPx + ', 0px);');
     }
     moveTo(curIndex, anim) {
-        var that = this;
+        const that = this;
         if (Math.min(Math.max(curIndex, 0), that.total) == that.curIndex) {
             return
         }
-        if (curIndex >= 0 && curIndex < that.total) {
-            //that.moveTo(that.curIndex)
-            this.curIndex = curIndex;
-        } else {
+        if (!(curIndex >= 0 && curIndex < that.total)) {
             if (!!that.opts.loop) {
                 curIndex = that.curIndex = curIndex < 0 ? that.total - 1 : 0
             } else {
@@ -233,17 +230,16 @@ class Fullpage {
             }
         }
 
-        var dist = that.opts.dir === 'v' ? (curIndex) * (-that.height) : curIndex * (-that.width)
-        that.nextIndex = curIndex;
-        that.opts.movingFlag = true;
-
         //beforeChange 返回false取消本次的滑动
-        var flag = that.opts.beforeChange(that.prevIndex, that.nextIndex);
+        let flag = that.opts.beforeChange.call(that, that.pageEles[this.curIndex], this.curIndex, curIndex);
         if (flag === false) {
-            that.opts.movingFlag = false;
             return false;
         }
 
+        let dist = that.opts.dir === 'v' ? (curIndex) * (-that.height) : curIndex * (-that.width)
+        this.curIndex = curIndex;
+
+        that.opts.movingFlag = true;
         if (anim) {
             that.el.classList.add('anim')
         } else {
@@ -253,18 +249,16 @@ class Fullpage {
         that.move(dist);
 
         const afterChange = () => {
-            that.opts.afterChange(that.prevIndex, that.nextIndex)
+            that.opts.afterChange.call(that, that.pageEles[this.curIndex], this.curIndex, curIndex)
             that.opts.movingFlag = false;
         }
 
-        window.setTimeout(() => {
-            that.prevIndex = curIndex
-            this.toogleAnimate(curIndex)
-
-            if (!anim) {
-                afterChange();
-            }
-        }, that.opts.duration)
+        // window.setTimeout(() => {
+        //     this.toogleAnimate(curIndex)
+        //     if (!anim) {
+        //         afterChange();
+        //     }
+        // }, that.opts.duration)
     }
     movePrev() {
         this.moveTo(this.curIndex - 1, true);
