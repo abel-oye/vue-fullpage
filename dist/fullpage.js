@@ -32,8 +32,9 @@ var createClass = function () {
  * vue2.x fullpage
  */
 function broadcast(children, eventName, params) {
+    var context = void 0;
     children && children.forEach(function (child) {
-        var context = child.context;
+        context = child.context;
 
         if (context) {
             context.$emit.apply(context, [eventName].concat(params));
@@ -49,7 +50,6 @@ var Fullpage = function () {
 
         classCallCheck(this, Fullpage);
 
-        var that = this;
         this.assignOpts(options);
 
         this.vnode = vnode;
@@ -73,14 +73,12 @@ var Fullpage = function () {
         this.initEvent(el);
 
         window.setTimeout(function () {
-
             _this.resize();
-
-            //如果是一页 则不移动 直接触发动画
-            if (that.curIndex == 0) {
-                that.toogleAnimate(that.curIndex);
+            //The first page triggers the animation directly
+            if (_this.curIndex === 0) {
+                _this.toogleAnimate(_this.curIndex);
             } else {
-                that.moveTo(that.curIndex, false);
+                _this.moveTo(_this.curIndex, false);
             }
         }, 0);
     }
@@ -91,8 +89,11 @@ var Fullpage = function () {
             this.width = this.opts.width || this.el.offsetWidth;
             this.height = this.opts.height || this.el.offsetHeight;
 
-            for (var i = 0; i < this.pageEles.length; i++) {
-                var pageEle = this.pageEles[i];
+            var i = 0,
+                length = this.pageEles.length,
+                pageEle = void 0;
+            for (; i < length; i++) {
+                pageEle = this.pageEles[i];
                 pageEle.setAttribute('data-id', i);
                 pageEle.classList.add('page');
                 //pageEle.style.width = this.width + 'px'
@@ -133,8 +134,7 @@ var Fullpage = function () {
         value: function initEvent(el) {
             var _this2 = this;
 
-            var that = this;
-            that.prevIndex = that.curIndex;
+            this.prevIndex = this.curIndex;
 
             if ("ontouchstart" in document) {
                 document.addEventListener('touchmove', function (e) {
@@ -144,38 +144,38 @@ var Fullpage = function () {
 
                 /// touch ///
                 el.addEventListener('touchstart', function (e) {
-                    if (that.opts.movingFlag) {
+                    if (_this2.opts.movingFlag) {
                         return false;
                     }
-                    that.startX = e.targetTouches[0].pageX;
-                    that.startY = e.targetTouches[0].pageY;
+                    _this2.startX = e.targetTouches[0].pageX;
+                    _this2.startY = e.targetTouches[0].pageY;
                 }, false);
 
                 el.addEventListener('touchend', function (e) {
                     e.preventDefault();
-                    if (that.opts.movingFlag) {
+                    if (_this2.opts.movingFlag) {
                         return false;
                     }
 
-                    var preIndex = that.curIndex;
-                    var dir = that.opts.dir;
-                    var sub = dir === 'v' ? (e.changedTouches[0].pageY - that.startY) / that.height : (e.changedTouches[0].pageX - that.startX) / that.width;
-                    var der = sub > that.opts.der ? -1 : sub < -that.opts.der ? 1 : 0;
+                    var preIndex = _this2.curIndex;
+                    var dir = _this2.opts.dir;
+                    var sub = dir === 'v' ? (e.changedTouches[0].pageY - _this2.startY) / _this2.height : (e.changedTouches[0].pageX - _this2.startX) / _this2.width;
+                    var der = sub > _this2.opts.der ? -1 : sub < -_this2.opts.der ? 1 : 0;
 
-                    var curIndex = der + that.curIndex;
+                    var curIndex = der + _this2.curIndex;
 
-                    that.moveTo(curIndex, true);
+                    _this2.moveTo(curIndex, true);
                 }, false);
             } else {
 
                 var isMousedown = false;
                 addEventListener(el, 'mousedown', function (e) {
-                    if (that.opts.movingFlag) {
+                    if (_this2.opts.movingFlag) {
                         return false;
                     }
                     isMousedown = true;
-                    that.startX = e.pageX;
-                    that.startY = e.pageY;
+                    _this2.startX = e.pageX;
+                    _this2.startY = e.pageY;
                 });
 
                 addEventListener(el, 'mouseup', function (e) {
@@ -184,17 +184,16 @@ var Fullpage = function () {
 
                 addEventListener(el, 'mousemove', function (e) {
                     e.preventDefault();
-                    if (that.opts.movingFlag || !isMousedown) {
+                    if (_this2.opts.movingFlag || !isMousedown) {
                         return false;
                     }
-                    var preIndex = that.curIndex;
-                    var dir = that.opts.dir;
-                    var sub = dir === 'v' ? (e.pageY - that.startY) / that.height : (e.pageX - that.startX) / that.width;
-                    var der = sub > that.opts.der ? -1 : sub < -that.opts.der ? 1 : 0;
+                    var dir = _this2.opts.dir;
+                    var sub = dir === 'v' ? (e.pageY - _this2.startY) / _this2.height : (e.pageX - _this2.startX) / _this2.width;
+                    var der = sub > _this2.opts.der ? -1 : sub < -_this2.opts.der ? 1 : 0;
 
-                    var curIndex = der + that.curIndex;
+                    var curIndex = der + _this2.curIndex;
 
-                    that.moveTo(curIndex, true);
+                    _this2.moveTo(curIndex, true);
                 });
 
                 var debounceTimer = void 0,
@@ -205,7 +204,7 @@ var Fullpage = function () {
                 var mousewheelType = document.mozFullScreen !== undefined ? 'DOMMouseScroll' : 'mousewheel';
 
                 addEventListener(el, mousewheelType, function (e) {
-                    if (that.opts.movingFlag) {
+                    if (_this2.opts.movingFlag) {
                         return false;
                     }
                     if (!debounce) {
@@ -218,8 +217,7 @@ var Fullpage = function () {
                         debounce = true;
                     }, interval);
 
-                    var preIndex = that.curIndex;
-                    var dir = that.opts.dir;
+                    var dir = _this2.opts.dir;
 
                     // 兼容 DOMMouseScroll event.detail 
                     if (!e.wheelDelta) {
@@ -231,9 +229,9 @@ var Fullpage = function () {
 
                     var der = sub > 0 ? 1 : sub < 0 ? -1 : 0;
 
-                    var curIndex = der + that.curIndex;
+                    var curIndex = der + _this2.curIndex;
 
-                    that.moveTo(curIndex, true);
+                    _this2.moveTo(curIndex, true);
                 });
             }
 
@@ -244,7 +242,7 @@ var Fullpage = function () {
             });
 
             addEventListener(window, 'resize', function () {
-                if (el.offsetHeight != that.height) {
+                if (el.offsetHeight != _this2.height) {
                     _this2.resize();
                 }
             });
@@ -264,50 +262,48 @@ var Fullpage = function () {
     }, {
         key: 'moveTo',
         value: function moveTo(curIndex, anim) {
-            var _this3 = this;
-
-            var that = this;
-            if (Math.min(Math.max(curIndex, 0), that.total) == that.curIndex) {
+            if (Math.min(Math.max(curIndex, 0), this.total) == this.curIndex) {
                 return;
             }
-            if (!(curIndex >= 0 && curIndex < that.total)) {
-                if (!!that.opts.loop) {
-                    curIndex = that.curIndex = curIndex < 0 ? that.total - 1 : 0;
+            if (!(curIndex >= 0 && curIndex < this.total)) {
+                if (!!this.opts.loop) {
+                    curIndex = this.curIndex = curIndex < 0 ? this.total - 1 : 0;
                 } else {
-                    that.curIndex = curIndex < 0 ? 0 : that.total - 1;
+                    this.curIndex = curIndex < 0 ? 0 : this.total - 1;
                     return;
                 }
             }
 
-            //beforeChange 返回false取消本次的滑动
-            var flag = that.opts.beforeChange.call(that, that.pageEles[this.curIndex], this.curIndex, curIndex);
+            //beforeChange return false cancel slide
+            var flag = this.opts.beforeChange.call(this, this.pageEles[this.curIndex], this.curIndex, curIndex);
             if (flag === false) {
                 return false;
             }
 
-            var dist = that.opts.dir === 'v' ? curIndex * -that.height : curIndex * -that.width;
+            var dist = this.opts.dir === 'v' ? curIndex * -this.height : curIndex * -this.width;
             this.curIndex = curIndex;
 
-            that.opts.movingFlag = true;
+            this.opts.movingFlag = true;
+
             if (anim) {
-                that.el.classList.add('anim');
+                this.el.classList.add(this.opts.animateClass);
             } else {
-                that.el.classList.remove('anim');
+                this.el.classList.remove(this.opts.animateClass);
             }
 
-            that.move(dist);
+            this.move(dist);
 
-            var afterChange = function afterChange() {
-                that.opts.afterChange.call(that, that.pageEles[_this3.curIndex], _this3.curIndex, curIndex);
-                that.opts.movingFlag = false;
-            };
+            // const afterChange = () => {
+            //     this.opts.afterChange.call(this, this.pageEles[this.curIndex], this.curIndex, curIndex)
+            //     this.opts.movingFlag = false;
+            // }
 
             // window.setTimeout(() => {
             //     this.toogleAnimate(curIndex)
             //     if (!anim) {
             //         afterChange();
             //     }
-            // }, that.opts.duration)
+            // }, this.opts.duration)
         }
     }, {
         key: 'movePrev',
@@ -348,8 +344,26 @@ Fullpage.defaultOptions = {
     dir: 'v',
     der: 0.1,
     movingFlag: false,
+    /**
+     * beforeChange
+     * @params
+     *     element {Element} current element
+     *     currenIndex {Number} current number
+     *     next    {Number}  next number
+     *         
+     * @type {Boolean}
+     */
     beforeChange: noop,
-    afterChange: noop
+    /**
+     * afterChange
+     * @params
+     *     element {Element} current element
+     *     currenIndex {Number} current number
+     *         
+     * @type {Boolean}
+     */
+    afterChange: noop,
+    animateClass: 'anim'
 };
 
 function noop() {}

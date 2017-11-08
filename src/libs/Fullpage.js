@@ -2,21 +2,20 @@
  * vue2.x fullpage
  */
 function broadcast(children, eventName, params) {
+    let context;
     children && children.forEach(child => {
-        var context = child.context;
+        context = child.context;
 
         if (context) {
             context.$emit.apply(context, [eventName].concat(params));
         }
 
-        broadcast(child.children, eventName, params)
-
+        broadcast(child.children, eventName, params);
     });
 }
 
 class Fullpage {
     constructor(el, options, vnode) {
-        var that = this;
         this.assignOpts(options);
 
         this.vnode = vnode;
@@ -40,14 +39,12 @@ class Fullpage {
         this.initEvent(el);
 
         window.setTimeout(() => {
-
             this.resize();
-
-            //如果是一页 则不移动 直接触发动画
-            if (that.curIndex == 0) {
-                that.toogleAnimate(that.curIndex)
+            //The first page triggers the animation directly
+            if (this.curIndex === 0) {
+                this.toogleAnimate(this.curIndex)
             } else {
-                that.moveTo(that.curIndex, false);
+                this.moveTo(this.curIndex, false);
             }
 
         }, 0)
@@ -57,8 +54,11 @@ class Fullpage {
         this.width = this.opts.width || this.el.offsetWidth
         this.height = this.opts.height || this.el.offsetHeight
 
-        for (var i = 0; i < this.pageEles.length; i++) {
-            var pageEle = this.pageEles[i]
+        let i = 0,
+            length = this.pageEles.length,
+            pageEle;
+        for (; i < length; i++) {
+            pageEle = this.pageEles[i]
             pageEle.setAttribute('data-id', i)
             pageEle.classList.add('page')
             //pageEle.style.width = this.width + 'px'
@@ -74,7 +74,7 @@ class Fullpage {
     assignOpts(opts, o) {
         o = o || Fullpage.defaultOptions
         opts = opts || {};
-        for (var key in opts) {
+        for (let key in opts) {
             if (opts.hasOwnProperty(key)) {
                 o[key] = opts[key]
             }
@@ -87,8 +87,7 @@ class Fullpage {
         }
     }
     initEvent(el) {
-        var that = this
-        that.prevIndex = that.curIndex
+        this.prevIndex = this.curIndex
 
         if ("ontouchstart" in document) {
             document.addEventListener('touchmove', e => {
@@ -98,38 +97,38 @@ class Fullpage {
 
             /// touch ///
             el.addEventListener('touchstart', e => {
-                if (that.opts.movingFlag) {
+                if (this.opts.movingFlag) {
                     return false;
                 }
-                that.startX = e.targetTouches[0].pageX;
-                that.startY = e.targetTouches[0].pageY;
+                this.startX = e.targetTouches[0].pageX;
+                this.startY = e.targetTouches[0].pageY;
             }, false);
 
             el.addEventListener('touchend', e => {
                 e.preventDefault();
-                if (that.opts.movingFlag) {
+                if (this.opts.movingFlag) {
                     return false;
                 }
 
-                var preIndex = that.curIndex;
-                var dir = that.opts.dir;
-                var sub = dir === 'v' ? (e.changedTouches[0].pageY - that.startY) / that.height : (e.changedTouches[0].pageX - that.startX) / that.width;
-                var der = sub > that.opts.der ? -1 : sub < -that.opts.der ? 1 : 0;
+                var preIndex = this.curIndex;
+                var dir = this.opts.dir;
+                var sub = dir === 'v' ? (e.changedTouches[0].pageY - this.startY) / this.height : (e.changedTouches[0].pageX - this.startX) / this.width;
+                var der = sub > this.opts.der ? -1 : sub < -this.opts.der ? 1 : 0;
 
-                var curIndex = der + that.curIndex;
+                var curIndex = der + this.curIndex;
 
-                that.moveTo(curIndex, true);
+                this.moveTo(curIndex, true);
             }, false)
         } else {
 
             var isMousedown = false;
             addEventListener(el, 'mousedown', e => {
-                if (that.opts.movingFlag) {
+                if (this.opts.movingFlag) {
                     return false;
                 }
                 isMousedown = true;
-                that.startX = e.pageX;
-                that.startY = e.pageY;
+                this.startX = e.pageX;
+                this.startY = e.pageY;
             });
 
             addEventListener(el, 'mouseup', e => {
@@ -138,17 +137,16 @@ class Fullpage {
 
             addEventListener(el, 'mousemove', e => {
                 e.preventDefault();
-                if (that.opts.movingFlag || !isMousedown) {
+                if (this.opts.movingFlag || !isMousedown) {
                     return false;
                 }
-                var preIndex = that.curIndex;
-                var dir = that.opts.dir;
-                var sub = dir === 'v' ? (e.pageY - that.startY) / that.height : (e.pageX - that.startX) / that.width;
-                var der = sub > that.opts.der ? -1 : sub < -that.opts.der ? 1 : 0;
+                let dir = this.opts.dir;
+                let sub = dir === 'v' ? (e.pageY - this.startY) / this.height : (e.pageX - this.startX) / this.width;
+                let der = sub > this.opts.der ? -1 : sub < -this.opts.der ? 1 : 0;
 
-                var curIndex = der + that.curIndex;
+                let curIndex = der + this.curIndex;
 
-                that.moveTo(curIndex, true);
+                this.moveTo(curIndex, true);
             });
 
             let debounceTimer,
@@ -159,7 +157,7 @@ class Fullpage {
             let mousewheelType = document.mozFullScreen !== undefined ? 'DOMMouseScroll' : 'mousewheel';
 
             addEventListener(el, mousewheelType, e => {
-                if (that.opts.movingFlag) {
+                if (this.opts.movingFlag) {
                     return false;
                 }
                 if (!debounce) {
@@ -173,8 +171,7 @@ class Fullpage {
                 }, interval);
 
 
-                let preIndex = that.curIndex;
-                let dir = that.opts.dir;
+                let dir = this.opts.dir;
 
                 // 兼容 DOMMouseScroll event.detail 
                 if (!e.wheelDelta) {
@@ -186,9 +183,9 @@ class Fullpage {
 
                 let der = sub > 0 ? 1 : sub < 0 ? -1 : 0;
 
-                let curIndex = der + that.curIndex;
+                let curIndex = der + this.curIndex;
 
-                that.moveTo(curIndex, true);
+                this.moveTo(curIndex, true);
             });
         }
 
@@ -199,14 +196,14 @@ class Fullpage {
         });
 
         addEventListener(window, 'resize', () => {
-            if (el.offsetHeight != that.height) {
+            if (el.offsetHeight != this.height) {
                 this.resize();
             }
         })
 
     }
     move(dist) {
-        var xPx = '0px',
+        let xPx = '0px',
             yPx = '0px';
         if (this.opts.dir === 'v') {
             yPx = dist + 'px';
@@ -217,48 +214,48 @@ class Fullpage {
             'transform : translate3d(' + xPx + ', ' + yPx + ', 0px);');
     }
     moveTo(curIndex, anim) {
-        const that = this;
-        if (Math.min(Math.max(curIndex, 0), that.total) == that.curIndex) {
+        if (Math.min(Math.max(curIndex, 0), this.total) == this.curIndex) {
             return
         }
-        if (!(curIndex >= 0 && curIndex < that.total)) {
-            if (!!that.opts.loop) {
-                curIndex = that.curIndex = curIndex < 0 ? that.total - 1 : 0
+        if (!(curIndex >= 0 && curIndex < this.total)) {
+            if (!!this.opts.loop) {
+                curIndex = this.curIndex = curIndex < 0 ? this.total - 1 : 0
             } else {
-                that.curIndex = curIndex < 0 ? 0 : that.total - 1;
+                this.curIndex = curIndex < 0 ? 0 : this.total - 1;
                 return
             }
         }
 
-        //beforeChange 返回false取消本次的滑动
-        let flag = that.opts.beforeChange.call(that, that.pageEles[this.curIndex], this.curIndex, curIndex);
+        //beforeChange return false cancel slide
+        let flag = this.opts.beforeChange.call(this, this.pageEles[this.curIndex], this.curIndex, curIndex);
         if (flag === false) {
             return false;
         }
 
-        let dist = that.opts.dir === 'v' ? (curIndex) * (-that.height) : curIndex * (-that.width)
+        let dist = this.opts.dir === 'v' ? (curIndex) * (-this.height) : curIndex * (-this.width)
         this.curIndex = curIndex;
 
-        that.opts.movingFlag = true;
+        this.opts.movingFlag = true;
+
         if (anim) {
-            that.el.classList.add('anim')
+            this.el.classList.add(this.opts.animateClass)
         } else {
-            that.el.classList.remove('anim')
+            this.el.classList.remove(this.opts.animateClass)
         }
 
-        that.move(dist);
+        this.move(dist);
 
-        const afterChange = () => {
-            that.opts.afterChange.call(that, that.pageEles[this.curIndex], this.curIndex, curIndex)
-            that.opts.movingFlag = false;
-        }
+        // const afterChange = () => {
+        //     this.opts.afterChange.call(this, this.pageEles[this.curIndex], this.curIndex, curIndex)
+        //     this.opts.movingFlag = false;
+        // }
 
         // window.setTimeout(() => {
         //     this.toogleAnimate(curIndex)
         //     if (!anim) {
         //         afterChange();
         //     }
-        // }, that.opts.duration)
+        // }, this.opts.duration)
     }
     movePrev() {
         this.moveTo(this.curIndex - 1, true);
@@ -292,8 +289,26 @@ Fullpage.defaultOptions = {
     dir: 'v',
     der: 0.1,
     movingFlag: false,
+    /**
+     * beforeChange
+     * @params
+     *     element {Element} current element
+     *     currenIndex {Number} current number
+     *     next    {Number}  next number
+     *         
+     * @type {Boolean}
+     */
     beforeChange: noop,
-    afterChange: noop
+    /**
+     * afterChange
+     * @params
+     *     element {Element} current element
+     *     currenIndex {Number} current number
+     *         
+     * @type {Boolean}
+     */
+    afterChange: noop,
+    animateClass: 'anim'
 };
 
 function noop() {
