@@ -1,7 +1,7 @@
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-	typeof define === 'function' && define.amd ? define(factory) :
-	(global.fullpage = factory());
+  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+  typeof define === 'function' && define.amd ? define(factory) :
+  (global.fullpage = factory());
 }(this, (function () { 'use strict';
 
 var classCallCheck = function (instance, Constructor) {
@@ -138,7 +138,7 @@ var Fullpage = function () {
 
             if ("ontouchstart" in document) {
                 document.addEventListener('touchmove', function (e) {
-                    e.preventDefault();
+                    e.stopPropagation();
                     return false;
                 }, false);
 
@@ -152,7 +152,6 @@ var Fullpage = function () {
                 }, false);
 
                 el.addEventListener('touchend', function (e) {
-                    e.preventDefault();
                     if (_this2.opts.movingFlag) {
                         return false;
                     }
@@ -161,10 +160,23 @@ var Fullpage = function () {
                     var dir = _this2.opts.dir;
                     var sub = dir === 'v' ? (e.changedTouches[0].pageY - _this2.startY) / _this2.height : (e.changedTouches[0].pageX - _this2.startX) / _this2.width;
                     var der = sub > _this2.opts.der ? -1 : sub < -_this2.opts.der ? 1 : 0;
-
                     var curIndex = der + _this2.curIndex;
-
-                    _this2.moveTo(curIndex, true);
+                    /* Code start */
+                    var my_elem = _this2.el.children[preIndex].children[0];
+                    var elem_class = my_elem.classList.contains('scrollable');
+					var mouse_wheel;
+					if(sub < 0){
+						mouse_wheel = 'scroll_down';
+					}else if (sub >= 0) {
+						mouse_wheel = 'scroll_up';
+					}
+					
+					if(isScrollHandler.isScrolled(my_elem, mouse_wheel) && elem_class){
+						_this2.moveTo(curIndex, true);
+					}else if(!elem_class){
+					    _this2.moveTo(curIndex, true);
+					}
+					/* Code end */
                 }, false);
             } else {
 
@@ -224,14 +236,25 @@ var Fullpage = function () {
                         e.deltaY = e.detail;
                         e.deltaX = e.detail;
                     }
-
+                    /* Code START */
+					var mouse_wheel = e.deltaY > 0 ? "scroll_down" : "scroll_up";
+					/* Code END */
                     var sub = dir === 'v' ? e.deltaY : e.deltaX;
 
                     var der = sub > 0 ? 1 : sub < 0 ? -1 : 0;
 
                     var curIndex = der + _this2.curIndex;
-
-                    _this2.moveTo(curIndex, true);
+                    /* Code START */
+                    var preIndex = _this2.curIndex;
+					var curIndex = der + _this2.curIndex < 0 ? 0 : der + _this2.curIndex;
+					var my_elem = _this2.el.children[preIndex].children[0];
+					var elem_class = my_elem.classList.contains('scrollable');
+					if(isScrollHandler.isScrolled(my_elem, mouse_wheel) && elem_class){
+						_this2.moveTo(curIndex, true);
+					}else if(!elem_class){ // if not scrollable
+					    _this2.moveTo(curIndex, true);
+					}
+					/* Code END */
                 });
             }
 
@@ -329,6 +352,18 @@ var Fullpage = function () {
     return Fullpage;
 }();
 
+/* Code START */
+var isScrollHandler = {
+    isScrolled: function(my_elem, mouse_wheel) {
+        if(mouse_wheel == "scroll_down"){
+            return window.innerHeight + my_elem.scrollTop + 1 >= my_elem.scrollHeight;
+        }else if (mouse_wheel == "scroll_up") {
+            return my_elem.scrollTop == 0;
+        }
+    }
+}
+/* Code END */
+
 function addEventListener(el, eventName, callback, isBubble) {
     if (el.addEventListener) {
         el.addEventListener(eventName, callback, !!isBubble);
@@ -369,81 +404,81 @@ Fullpage.defaultOptions = {
 function noop() {}
 
 var Animate = function () {
-	function Animate(el, binding, vnode) {
-		classCallCheck(this, Animate);
+  function Animate(el, binding, vnode) {
+    classCallCheck(this, Animate);
 
-		var that = this,
-		    vm = vnode.context,
-		    aminate = binding.value;
+    var that = this,
+        vm = vnode.context,
+        aminate = binding.value;
 
-		el.style.opacity = '0';
-		vm.$on('toogle.animate', function (curIndex) {
-			var curPage = +el.parentNode.getAttribute('data-id');
-			if (curIndex === curPage) {
-				that.addAnimated(el, aminate);
-			} else {
-				el.style.opacity = '0';
-				that.removeAnimated(el, aminate);
-			}
-		});
-	}
+    el.style.opacity = '0';
+    vm.$on('toogle.animate', function (curIndex) {
+      var curPage = +el.parentNode.getAttribute('data-id');
+      if (curIndex === curPage) {
+        that.addAnimated(el, aminate);
+      } else {
+        el.style.opacity = '0';
+        that.removeAnimated(el, aminate);
+      }
+    });
+  }
 
-	createClass(Animate, [{
-		key: 'addAnimated',
-		value: function addAnimated(el, animate) {
-			var delay = animate.delay || 0;
-			el.classList.add('animated');
-			window.setTimeout(function () {
-				el.style.opacity = '1';
-				el.classList.add(animate.value);
-			}, delay);
-		}
-	}, {
-		key: 'removeAnimated',
-		value: function removeAnimated(el, animate) {
-			var cls = el.getAttribute('class');
-			if (cls && cls.indexOf('animated') > -1) {
-				el.classList.remove(animate.value);
-			}
-		}
-	}]);
-	return Animate;
+  createClass(Animate, [{
+    key: 'addAnimated',
+    value: function addAnimated(el, animate) {
+      var delay = animate.delay || 0;
+      el.classList.add('animated');
+      window.setTimeout(function () {
+        el.style.opacity = '1';
+        el.classList.add(animate.value);
+      }, delay);
+    }
+  }, {
+    key: 'removeAnimated',
+    value: function removeAnimated(el, animate) {
+      var cls = el.getAttribute('class');
+      if (cls && cls.indexOf('animated') > -1) {
+        el.classList.remove(animate.value);
+      }
+    }
+  }]);
+  return Animate;
 }();
 
 var fullpage = {
-	install: function install(Vue, options) {
-		Vue.directive('fullpage', {
-			inserted: function inserted(el, binding, vnode) {
-				var opts = binding.value || {};
+  install: function install(Vue, options) {
+    Vue.directive('fullpage', {
+      inserted: function inserted(el, binding, vnode) {
+        var opts = binding.value || {};
 
-				el.$fullpage = new Fullpage(el, opts, vnode);
+        el.$fullpage = new Fullpage(el, opts, vnode);
 
-				el.$fullpage.$update = function () {
-					Vue.nextTick(function () {
-						el.$fullpage.update();
-					});
-				};
-			},
-			componentUpdated: function componentUpdated(el, binding, vnode) {
+        el.$fullpage.$update = function () {
+          Vue.nextTick(function () {
+            el.$fullpage.update();
+          });
+        };
+      },
+      componentUpdated: function componentUpdated(el, binding, vnode) {
 
-				var opts = binding.value || {};
-				var that = el.$fullpage;
-				that.setOptions(opts);
-			}
-		});
+        var opts = binding.value || {};
+        var that = el.$fullpage;
+        that.setOptions(opts);
+      }
+    });
 
-		Vue.directive('animate', {
-			inserted: function inserted(el, binding, vnode) {
-				var opts = binding || {};
-				el.$animate = new Animate(el, opts, vnode);
-			}
-		});
-	}
+    Vue.directive('animate', {
+      inserted: function inserted(el, binding, vnode) {
+        var opts = binding || {};
+        el.$animate = new Animate(el, opts, vnode);
+      }
+    });
+  }
 };
 
 if (window.Vue) {
-	window.VueFullpage = fullpage;
-	Vue.use(fullpage);
+  window.VueFullpage = fullpage;
+  Vue.use(fullpage);
 }
 
 return fullpage;

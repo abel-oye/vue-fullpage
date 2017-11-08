@@ -145,3 +145,34 @@ The following settings allow the scrolling page to fill the full screen.
 }
 </style>
 ```
+
+**overflow**
+
+To scroll with overflow content, add an element with the class ``scrollable`` inside the ``page`` class element.
+
+```html
+<div class="fullpage-container">
+  <div class="fullpage-wp" v-fullpage="opts" ref="example">
+    <div class="page">
+      <div class="scrollable">
+        <p>Overflow content</p>
+        <p>Overflow content</p>
+        ...
+        <p>Overflow content</p>
+      </div>
+    </div>
+    <div class="page">
+      <p>fullpage-vue</p>
+    </div>
+    <div class="page">
+      <div class="scrollable">
+        <p>Overflow content</p>
+        <p>Overflow content</p>
+        ...
+        <p>Overflow content</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+```
