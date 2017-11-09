@@ -89,7 +89,8 @@
                 </div>
                 <div class="fullpage-wp" v-fullpage="opts" ref="fullpage">
                     <div class="page-1 page">
-                        <h1 class="part-1" v-animate="{value: 'bounceInLeft'}">vue-fullpage.js</h1>
+                        <h1 class="part-1" v-animate="{value: 'bounceInLeft'}">vue-fullpage.js </h1>
+                        <h2>scroll in pages</h2>
                         <h3 class="" v-animate="{value: 'bounceInLeft'}">A sigle-page scroll plugin based on vue@2.x,support for mobile and PC .</h3>
                     </div>
                     <div class="page-2 page">
@@ -176,30 +177,41 @@
                     dir: 'v',
                     loop: false,
                     duration: 300,
-                    beforeChange: function(elem, prev, next) {
-                    	var height = elem.getBoundingClientRect().height,
-                    		scrollTop = elem.scrollTop,
-                    		scrollHeight  = elem.scrollHeight;
+                    beforeChange: function(elem, current, next) {
+                        var height = elem.getBoundingClientRect().height,
+                            scrollTop = elem.scrollTop,
+                            scrollHeight = elem.scrollHeight;
 
-                    	console.log(elem.scrollTop,elem.scrollHeight,elem.getBoundingClientRect())
-                    	if( scrollHeight > height ){
-                    		if(next > prev){//down
-                    			return height + scrollTop >= scrollHeight;
-                    		}else{//up
-                    			return scrollTop <= 0
-                    		}
-                    	}
-                        console.log('before', prev, next)
+                        console.log(elem.scrollTop, elem.scrollHeight, elem.getBoundingClientRect())
+                        if (scrollHeight > height) {
+                            if (next > current) { //down
+                                return height + scrollTop >= scrollHeight;
+                            } else { //up
+                                return scrollTop <= 0
+                            }
+                        }
+                        console.log('before', current, next)
                     },
-                    afterChange: function(elem, prev, next) {
-                        console.log('after', prev, next)
+                    afterChange: function(elem, current) {
+                        that.index = current;
+                        console.log('after', current)
                     }
                 }
             };
         },
         methods: {
             moveTo: function(index) {
-                this.$refs.fullpage.$fullpage.moveTo(index, true);
+                const $fullpage = this.$refs.fullpage.$fullpage
+                /* Fast solution
+                index > this.index scroll to bottom
+                || scroll to top */
+                if (index < this.index) {
+                    $fullpage.pageEles[this.index].scrollTo(0, 0)
+                } else {
+                    $fullpage.pageEles[this.index].scrollTo(0, $fullpage.pageEles[this.index].scrollHeight)
+                }
+                $fullpage.moveTo(index, true)
+                this.index = index
             },
             showPage: function() {
                 this.pageNum++;
