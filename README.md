@@ -32,6 +32,10 @@ npm install animate.css --save
 - `movingFlag` : (default:`false`) 
 - `beforeChange` : (default:`function`) Before change callback
 - `afterChange` : (default:`function`) After change callback
+- `overflow` : (default:`hidden`) hidden || scroll || auto
+    `hidden` Hidden overflow
+    `scroll` Handling the scroll bars of page
+    `auto`  Handling all scroll bars in page,Start checking from triggered elements
 
 ### method
 

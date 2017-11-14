@@ -5,39 +5,30 @@ function broadcast(children, eventName, params) {
     let context;
     children && children.forEach(child => {
         context = child.context;
-
         if (context) {
             context.$emit.apply(context, [eventName].concat(params));
         }
-
         broadcast(child.children, eventName, params);
     });
 }
-
 class Fullpage {
     constructor(el, options, vnode) {
         this.assignOpts(options);
-
         this.vnode = vnode;
         this.vm = vnode.context
         this.curIndex = this.opts.start;
-
         this.startY = 0;
         this.opts.movingFlag = false;
-
         this.el = el;
         this.el.classList.add('fullpage-wp');
-
         this.parentEle = this.el.parentNode;
         this.parentEle.classList.add('fullpage-container');
-
         this.pageEles = this.el.children;
         this.total = this.pageEles.length;
+        this.direction = -1;
 
         this.initScrollDirection();
-
         this.initEvent(el);
-
         window.setTimeout(() => {
             this.resize();
             //The first page triggers the animation directly
@@ -46,14 +37,11 @@ class Fullpage {
             } else {
                 this.moveTo(this.curIndex, false);
             }
-
         }, 0)
-
     }
     resize() {
         this.width = this.opts.width || this.el.offsetWidth
         this.height = this.opts.height || this.el.offsetHeight
-
         let i = 0,
             length = this.pageEles.length,
             pageEle;
@@ -88,13 +76,7 @@ class Fullpage {
     }
     initEvent(el) {
         this.prevIndex = this.curIndex
-
         if ("ontouchstart" in document) {
-            document.addEventListener('touchmove', e => {
-                e.preventDefault();
-                return false;
-            }, false);
-
             /// touch ///
             el.addEventListener('touchstart', e => {
                 if (this.opts.movingFlag) {
@@ -102,121 +84,123 @@ class Fullpage {
                 }
                 this.startX = e.targetTouches[0].pageX;
                 this.startY = e.targetTouches[0].pageY;
-            }, false);
-
+            });
             el.addEventListener('touchend', e => {
-                e.preventDefault();
+                //e.preventDefault();
                 if (this.opts.movingFlag) {
                     return false;
                 }
-
-                var preIndex = this.curIndex;
-                var dir = this.opts.dir;
-                var sub = dir === 'v' ? (e.changedTouches[0].pageY - this.startY) / this.height : (e.changedTouches[0].pageX - this.startX) / this.width;
-                var der = sub > this.opts.der ? -1 : sub < -this.opts.der ? 1 : 0;
-
-                var curIndex = der + this.curIndex;
-
-                this.moveTo(curIndex, true);
-            }, false)
-        } else {
-
-            var isMousedown = false;
-            addEventListener(el, 'mousedown', e => {
-                if (this.opts.movingFlag) {
-                    return false;
-                }
-                isMousedown = true;
-                this.startX = e.pageX;
-                this.startY = e.pageY;
-            });
-
-            addEventListener(el, 'mouseup', e => {
-                isMousedown = false;
-            });
-
-            addEventListener(el, 'mousemove', e => {
-                e.preventDefault();
-                if (this.opts.movingFlag || !isMousedown) {
-                    return false;
-                }
+                let preIndex = this.curIndex;
                 let dir = this.opts.dir;
-                let sub = dir === 'v' ? (e.pageY - this.startY) / this.height : (e.pageX - this.startX) / this.width;
-                let der = sub > this.opts.der ? -1 : sub < -this.opts.der ? 1 : 0;
-
+                let sub = this.direction = dir === 'v' ? (e.changedTouches[0].pageY - this.startY) / this.height : (e.changedTouches[0].pageX - this.startX) / this.width;
+                let der =  sub > this.opts.der ? -1 : sub < -this.opts.der ? 1 : 0;
                 let curIndex = der + this.curIndex;
-
                 this.moveTo(curIndex, true);
             });
+            document.body.addEventListener('touchmove', e => {
+                let {
+                    overflow
+                } = this.opts;
 
-            let debounceTimer,
-                interval = 1200,
-                debounce = true;
-
-            // fixed firefox DOMMouseScroll closed #1.
-            let mousewheelType = document.mozFullScreen !== undefined ? 'DOMMouseScroll' : 'mousewheel';
-
-            addEventListener(el, mousewheelType, e => {
-                if (this.opts.movingFlag) {
-                    return false;
+                let currentPage = this.pageEles[this.curIndex];
+                if (overflow === 'hidden') {
+                    e.preventDefault();
+                } else {
+                    let currentTarget = e.target;
+                    
+                    while (currentTarget) {
+                        if( (overflow === 'scroll' && currentTarget === currentPage) || 
+                                (overflow !== 'scroll' && currentTarget !== currentPage) ){
+                            if (!Fullpage.iSWhetherEnds(currentTarget, this.direction)) {
+                                return;
+                            }
+                        }
+                        
+                        currentTarget = currentTarget.parentNode;
+                    }
+                    e.preventDefault();
                 }
-                if (!debounce) {
-                    return;
-                }
-
-                debounce = false;
-                clearTimeout(debounceTimer);
-                debounceTimer = setTimeout(() => {
-                    debounce = true;
-                }, interval);
-
-
-                let dir = this.opts.dir;
-
-                // 兼容 DOMMouseScroll event.detail 
-                if (!e.wheelDelta) {
-                    e.deltaY = e.detail;
-                    e.deltaX = e.detail;
-                }
-
-                let sub = dir === 'v' ? e.deltaY : e.deltaX;
-
-                let der = sub > 0 ? 1 : sub < 0 ? -1 : 0;
-
-                let curIndex = der + this.curIndex;
-
-                this.moveTo(curIndex, true);
             });
         }
-
+        //else {
+        let isMousedown = false;
+        addEventListener(el, 'mousedown', e => {
+            if (this.opts.movingFlag) {
+                return false;
+            }
+            isMousedown = true;
+            this.startX = e.pageX;
+            this.startY = e.pageY;
+        });
+        addEventListener(el, 'mouseup', e => {
+            isMousedown = false;
+        });
+        addEventListener(el, 'mousemove', e => {
+            //e.preventDefault();
+            if (this.opts.movingFlag || !isMousedown) {
+                return false;
+            }
+            let dir = this.opts.dir;
+            let sub = this.direction = dir === 'v' ? (e.pageY - this.startY) / this.height : (e.pageX - this.startX) / this.width;
+            let der  = sub > this.opts.der ? -1 : sub < -this.opts.der ? 1 : 0;
+            let curIndex = der + this.curIndex;
+            this.moveTo(curIndex, true);
+        });
+        let debounceTimer,
+            interval = 1200,
+            debounce = true;
+        // fixed firefox DOMMouseScroll closed #1.
+        let mousewheelType = document.mozFullScreen !== undefined ? 'DOMMouseScroll' : 'mousewheel';
+        addEventListener(el, mousewheelType, e => {
+            if (this.opts.movingFlag) {
+                return false;
+            }
+            if (!debounce) {
+                return;
+            }
+            debounce = false;
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                debounce = true;
+            }, interval);
+            let dir = this.opts.dir;
+            // 兼容 DOMMouseScroll event.detail 
+            if (!e.wheelDelta) {
+                e.deltaY = e.detail;
+                e.deltaX = e.detail;
+            }
+            let sub = this.direction = dir === 'v' ? e.deltaY : e.deltaX;
+            let der =  sub > 0 ? 1 : sub < 0 ? -1 : 0;
+            let curIndex = der + this.curIndex;
+            this.moveTo(curIndex, true);
+        });
+        //}
         addEventListener(el, 'webkitTransitionEnd', () => {
             this.toogleAnimate(this.curIndex)
             this.opts.afterChange.call(this, this.pageEles[this.curIndex], this.curIndex)
             this.opts.movingFlag = false;
         });
-
         addEventListener(window, 'resize', () => {
             if (el.offsetHeight != this.height) {
                 this.resize();
             }
         })
-
     }
     move(dist) {
-        let xPx = '0px',
-            yPx = '0px';
+        let xPx = 0,
+            yPx = 0;
         if (this.opts.dir === 'v') {
-            yPx = dist + 'px';
+            yPx = dist;
         } else {
-            xPx = dist + 'px'
+            xPx = dist
         }
-        this.el.style.cssText += (';-webkit-transform : translate3d(' + xPx + ', ' + yPx + ', 0px);' +
-            'transform : translate3d(' + xPx + ', ' + yPx + ', 0px);');
+        this.el.style.cssText += (';-webkit-transform : translate3d(' + xPx + 'px, ' + yPx + 'px, 0px);' + 'transform : translate3d(' + xPx + 'px, ' + yPx + 'px, 0px);');
     }
     moveTo(curIndex, anim) {
-        if (Math.min(Math.max(curIndex, 0), this.total) == this.curIndex) {
+        if (this.opts.overflow === 'scroll' && !Fullpage.iSWhetherEnds(this.pageEles[this.curIndex],this.direction )) {
             return
         }
+
         if (!(curIndex >= 0 && curIndex < this.total)) {
             if (!!this.opts.loop) {
                 curIndex = this.curIndex = curIndex < 0 ? this.total - 1 : 0
@@ -225,31 +209,24 @@ class Fullpage {
                 return
             }
         }
-
         //beforeChange return false cancel slide
         let flag = this.opts.beforeChange.call(this, this.pageEles[this.curIndex], this.curIndex, curIndex);
         if (flag === false) {
             return false;
         }
-
         let dist = this.opts.dir === 'v' ? (curIndex) * (-this.height) : curIndex * (-this.width)
         this.curIndex = curIndex;
-
         this.opts.movingFlag = true;
-
         if (anim) {
             this.el.classList.add(this.opts.animateClass)
         } else {
             this.el.classList.remove(this.opts.animateClass)
         }
-
         this.move(dist);
-
         // const afterChange = () => {
         //     this.opts.afterChange.call(this, this.pageEles[this.curIndex], this.curIndex, curIndex)
         //     this.opts.movingFlag = false;
         // }
-
         // window.setTimeout(() => {
         //     this.toogleAnimate(curIndex)
         //     if (!anim) {
@@ -268,20 +245,25 @@ class Fullpage {
         this.total = this.pageEles.length;
         this.resize();
     }
-    destroy() {
-
-    }
+    destroy() {}
 }
 
-
-function addEventListener(el, eventName, callback, isBubble) {
+function addEventListener(el, eventName, callback, isUseCapture) {
     if (el.addEventListener) {
-        el.addEventListener(eventName, callback, !!isBubble);
+        el.addEventListener(eventName, callback, !!isUseCapture);
     } else {
-        el.attachEvent('on' + eventName, callback, !!isBubble);
+        el.attachEvent('on' + eventName, callback);
     }
 }
-
+Fullpage.iSWhetherEnds = (target, direction) => {
+    if (direction > 0) {
+        return target.scrollTop <= 0
+    } else {
+        let height = target.getBoundingClientRect().height
+        return target.scrollTop + height >= target.scrollHeight
+        // down
+    }
+}
 Fullpage.defaultOptions = {
     start: 0,
     duration: 500,
@@ -294,7 +276,7 @@ Fullpage.defaultOptions = {
      * @params
      *     element {Element} current element
      *     currenIndex {Number} current number
-     *     next    {Number}  next number
+     *     next    {Number}  next nummober
      *         
      * @type {Boolean}
      */
@@ -308,11 +290,16 @@ Fullpage.defaultOptions = {
      * @type {Boolean}
      */
     afterChange: noop,
-    animateClass: 'anim'
+    animateClass: 'anim',
+    /*
+     *    There are scroll bars in the page,
+     *    `auto` Detect any element in page 
+     *    `scroll` Only detect current page
+     *    `hidden` ignores the scroll bar in the page
+     *   @default hidden 
+     */
+    overflow: 'hidden'
 };
 
-function noop() {
-
-}
-
+function noop() {}
 export default Fullpage;

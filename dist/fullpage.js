@@ -35,11 +35,9 @@ function broadcast(children, eventName, params) {
     var context = void 0;
     children && children.forEach(function (child) {
         context = child.context;
-
         if (context) {
             context.$emit.apply(context, [eventName].concat(params));
         }
-
         broadcast(child.children, eventName, params);
     });
 }
@@ -51,27 +49,21 @@ var Fullpage = function () {
         classCallCheck(this, Fullpage);
 
         this.assignOpts(options);
-
         this.vnode = vnode;
         this.vm = vnode.context;
         this.curIndex = this.opts.start;
-
         this.startY = 0;
         this.opts.movingFlag = false;
-
         this.el = el;
         this.el.classList.add('fullpage-wp');
-
         this.parentEle = this.el.parentNode;
         this.parentEle.classList.add('fullpage-container');
-
         this.pageEles = this.el.children;
         this.total = this.pageEles.length;
+        this.direction = -1;
 
         this.initScrollDirection();
-
         this.initEvent(el);
-
         window.setTimeout(function () {
             _this.resize();
             //The first page triggers the animation directly
@@ -88,7 +80,6 @@ var Fullpage = function () {
         value: function resize() {
             this.width = this.opts.width || this.el.offsetWidth;
             this.height = this.opts.height || this.el.offsetHeight;
-
             var i = 0,
                 length = this.pageEles.length,
                 pageEle = void 0;
@@ -135,13 +126,7 @@ var Fullpage = function () {
             var _this2 = this;
 
             this.prevIndex = this.curIndex;
-
             if ("ontouchstart" in document) {
-                document.addEventListener('touchmove', function (e) {
-                    e.preventDefault();
-                    return false;
-                }, false);
-
                 /// touch ///
                 el.addEventListener('touchstart', function (e) {
                     if (_this2.opts.movingFlag) {
@@ -149,98 +134,100 @@ var Fullpage = function () {
                     }
                     _this2.startX = e.targetTouches[0].pageX;
                     _this2.startY = e.targetTouches[0].pageY;
-                }, false);
-
+                });
                 el.addEventListener('touchend', function (e) {
-                    e.preventDefault();
+                    //e.preventDefault();
                     if (_this2.opts.movingFlag) {
                         return false;
                     }
-
                     var preIndex = _this2.curIndex;
                     var dir = _this2.opts.dir;
-                    var sub = dir === 'v' ? (e.changedTouches[0].pageY - _this2.startY) / _this2.height : (e.changedTouches[0].pageX - _this2.startX) / _this2.width;
+                    var sub = _this2.direction = dir === 'v' ? (e.changedTouches[0].pageY - _this2.startY) / _this2.height : (e.changedTouches[0].pageX - _this2.startX) / _this2.width;
                     var der = sub > _this2.opts.der ? -1 : sub < -_this2.opts.der ? 1 : 0;
-
                     var curIndex = der + _this2.curIndex;
-
-                    _this2.moveTo(curIndex, true);
-                }, false);
-            } else {
-
-                var isMousedown = false;
-                addEventListener(el, 'mousedown', function (e) {
-                    if (_this2.opts.movingFlag) {
-                        return false;
-                    }
-                    isMousedown = true;
-                    _this2.startX = e.pageX;
-                    _this2.startY = e.pageY;
-                });
-
-                addEventListener(el, 'mouseup', function (e) {
-                    isMousedown = false;
-                });
-
-                addEventListener(el, 'mousemove', function (e) {
-                    e.preventDefault();
-                    if (_this2.opts.movingFlag || !isMousedown) {
-                        return false;
-                    }
-                    var dir = _this2.opts.dir;
-                    var sub = dir === 'v' ? (e.pageY - _this2.startY) / _this2.height : (e.pageX - _this2.startX) / _this2.width;
-                    var der = sub > _this2.opts.der ? -1 : sub < -_this2.opts.der ? 1 : 0;
-
-                    var curIndex = der + _this2.curIndex;
-
                     _this2.moveTo(curIndex, true);
                 });
+                document.body.addEventListener('touchmove', function (e) {
+                    var overflow = _this2.opts.overflow;
 
-                var debounceTimer = void 0,
-                    interval = 1200,
-                    debounce = true;
 
-                // fixed firefox DOMMouseScroll closed #1.
-                var mousewheelType = document.mozFullScreen !== undefined ? 'DOMMouseScroll' : 'mousewheel';
+                    var currentPage = _this2.pageEles[_this2.curIndex];
+                    if (overflow === 'hidden') {
+                        e.preventDefault();
+                    } else {
+                        var currentTarget = e.target;
 
-                addEventListener(el, mousewheelType, function (e) {
-                    if (_this2.opts.movingFlag) {
-                        return false;
+                        while (currentTarget) {
+                            if (overflow === 'scroll' && currentTarget === currentPage || overflow !== 'scroll' && currentTarget !== currentPage) {
+                                if (!Fullpage.iSWhetherEnds(currentTarget, _this2.direction)) {
+                                    return;
+                                }
+                            }
+
+                            currentTarget = currentTarget.parentNode;
+                        }
+                        e.preventDefault();
                     }
-                    if (!debounce) {
-                        return;
-                    }
-
-                    debounce = false;
-                    clearTimeout(debounceTimer);
-                    debounceTimer = setTimeout(function () {
-                        debounce = true;
-                    }, interval);
-
-                    var dir = _this2.opts.dir;
-
-                    // 兼容 DOMMouseScroll event.detail 
-                    if (!e.wheelDelta) {
-                        e.deltaY = e.detail;
-                        e.deltaX = e.detail;
-                    }
-
-                    var sub = dir === 'v' ? e.deltaY : e.deltaX;
-
-                    var der = sub > 0 ? 1 : sub < 0 ? -1 : 0;
-
-                    var curIndex = der + _this2.curIndex;
-
-                    _this2.moveTo(curIndex, true);
                 });
             }
-
+            //else {
+            var isMousedown = false;
+            addEventListener(el, 'mousedown', function (e) {
+                if (_this2.opts.movingFlag) {
+                    return false;
+                }
+                isMousedown = true;
+                _this2.startX = e.pageX;
+                _this2.startY = e.pageY;
+            });
+            addEventListener(el, 'mouseup', function (e) {
+                isMousedown = false;
+            });
+            addEventListener(el, 'mousemove', function (e) {
+                //e.preventDefault();
+                if (_this2.opts.movingFlag || !isMousedown) {
+                    return false;
+                }
+                var dir = _this2.opts.dir;
+                var sub = _this2.direction = dir === 'v' ? (e.pageY - _this2.startY) / _this2.height : (e.pageX - _this2.startX) / _this2.width;
+                var der = sub > _this2.opts.der ? -1 : sub < -_this2.opts.der ? 1 : 0;
+                var curIndex = der + _this2.curIndex;
+                _this2.moveTo(curIndex, true);
+            });
+            var debounceTimer = void 0,
+                interval = 1200,
+                debounce = true;
+            // fixed firefox DOMMouseScroll closed #1.
+            var mousewheelType = document.mozFullScreen !== undefined ? 'DOMMouseScroll' : 'mousewheel';
+            addEventListener(el, mousewheelType, function (e) {
+                if (_this2.opts.movingFlag) {
+                    return false;
+                }
+                if (!debounce) {
+                    return;
+                }
+                debounce = false;
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(function () {
+                    debounce = true;
+                }, interval);
+                var dir = _this2.opts.dir;
+                // 兼容 DOMMouseScroll event.detail 
+                if (!e.wheelDelta) {
+                    e.deltaY = e.detail;
+                    e.deltaX = e.detail;
+                }
+                var sub = _this2.direction = dir === 'v' ? e.deltaY : e.deltaX;
+                var der = sub > 0 ? 1 : sub < 0 ? -1 : 0;
+                var curIndex = der + _this2.curIndex;
+                _this2.moveTo(curIndex, true);
+            });
+            //}
             addEventListener(el, 'webkitTransitionEnd', function () {
                 _this2.toogleAnimate(_this2.curIndex);
                 _this2.opts.afterChange.call(_this2, _this2.pageEles[_this2.curIndex], _this2.curIndex);
                 _this2.opts.movingFlag = false;
             });
-
             addEventListener(window, 'resize', function () {
                 if (el.offsetHeight != _this2.height) {
                     _this2.resize();
@@ -250,21 +237,22 @@ var Fullpage = function () {
     }, {
         key: 'move',
         value: function move(dist) {
-            var xPx = '0px',
-                yPx = '0px';
+            var xPx = 0,
+                yPx = 0;
             if (this.opts.dir === 'v') {
-                yPx = dist + 'px';
+                yPx = dist;
             } else {
-                xPx = dist + 'px';
+                xPx = dist;
             }
-            this.el.style.cssText += ';-webkit-transform : translate3d(' + xPx + ', ' + yPx + ', 0px);' + 'transform : translate3d(' + xPx + ', ' + yPx + ', 0px);';
+            this.el.style.cssText += ';-webkit-transform : translate3d(' + xPx + 'px, ' + yPx + 'px, 0px);' + 'transform : translate3d(' + xPx + 'px, ' + yPx + 'px, 0px);';
         }
     }, {
         key: 'moveTo',
         value: function moveTo(curIndex, anim) {
-            if (Math.min(Math.max(curIndex, 0), this.total) == this.curIndex) {
+            if (this.opts.overflow === 'scroll' && !Fullpage.iSWhetherEnds(this.pageEles[this.curIndex], this.direction)) {
                 return;
             }
+
             if (!(curIndex >= 0 && curIndex < this.total)) {
                 if (!!this.opts.loop) {
                     curIndex = this.curIndex = curIndex < 0 ? this.total - 1 : 0;
@@ -273,31 +261,24 @@ var Fullpage = function () {
                     return;
                 }
             }
-
             //beforeChange return false cancel slide
             var flag = this.opts.beforeChange.call(this, this.pageEles[this.curIndex], this.curIndex, curIndex);
             if (flag === false) {
                 return false;
             }
-
             var dist = this.opts.dir === 'v' ? curIndex * -this.height : curIndex * -this.width;
             this.curIndex = curIndex;
-
             this.opts.movingFlag = true;
-
             if (anim) {
                 this.el.classList.add(this.opts.animateClass);
             } else {
                 this.el.classList.remove(this.opts.animateClass);
             }
-
             this.move(dist);
-
             // const afterChange = () => {
             //     this.opts.afterChange.call(this, this.pageEles[this.curIndex], this.curIndex, curIndex)
             //     this.opts.movingFlag = false;
             // }
-
             // window.setTimeout(() => {
             //     this.toogleAnimate(curIndex)
             //     if (!anim) {
@@ -329,14 +310,22 @@ var Fullpage = function () {
     return Fullpage;
 }();
 
-function addEventListener(el, eventName, callback, isBubble) {
+function addEventListener(el, eventName, callback, isUseCapture) {
     if (el.addEventListener) {
-        el.addEventListener(eventName, callback, !!isBubble);
+        el.addEventListener(eventName, callback, !!isUseCapture);
     } else {
-        el.attachEvent('on' + eventName, callback, !!isBubble);
+        el.attachEvent('on' + eventName, callback);
     }
 }
-
+Fullpage.iSWhetherEnds = function (target, direction) {
+    if (direction > 0) {
+        return target.scrollTop <= 0;
+    } else {
+        var height = target.getBoundingClientRect().height;
+        return target.scrollTop + height >= target.scrollHeight;
+        // down
+    }
+};
 Fullpage.defaultOptions = {
     start: 0,
     duration: 500,
@@ -349,7 +338,7 @@ Fullpage.defaultOptions = {
      * @params
      *     element {Element} current element
      *     currenIndex {Number} current number
-     *     next    {Number}  next number
+     *     next    {Number}  next nummober
      *         
      * @type {Boolean}
      */
@@ -363,7 +352,15 @@ Fullpage.defaultOptions = {
      * @type {Boolean}
      */
     afterChange: noop,
-    animateClass: 'anim'
+    animateClass: 'anim',
+    /*
+     *    There are scroll bars in the page,
+     *    `auto` Detect any element in page 
+     *    `scroll` Only detect current page
+     *    `hidden` ignores the scroll bar in the page
+     *   @default hidden 
+     */
+    overflow: 'hidden'
 };
 
 function noop() {}

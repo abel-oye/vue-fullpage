@@ -84,18 +84,16 @@
                     <button type="button" :class="{active:index ==0}" @click="moveTo(0)">first page</button>
                     <button type="button" :class="{active:index ==1}" @click="moveTo(1)">Second page</button>
                     <button type="button" :class="{active:index ==2}" @click="moveTo(2)">Third page</button>
-                    <button type="button" v-for="btn in pageNum" :class="{active:index == btn + 2}" @click="moveTo(btn+2)">page {{btn+2}}</button>
-                    <button type="button" @click="showPage()">add page</button>
                 </div>
                 <div class="fullpage-wp" v-fullpage="opts" ref="fullpage">
                     <div class="page-1 page">
                         <h1 class="part-1" v-animate="{value: 'bounceInLeft'}">vue-fullpage.js </h1>
-                        <h2>scroll in pages</h2>
+                        <h2 v-animate="{value: 'bounceInLeft'}">scroll in pages</h2>
                         <h3 class="" v-animate="{value: 'bounceInLeft'}">A sigle-page scroll plugin based on vue@2.x,support for mobile and PC .</h3>
                     </div>
                     <div class="page-2 page">
                         <h2 class="part-2" v-animate="{value: 'bounceInRight'}">Easy to use plugin</h2>
-                        <ul>
+                        <ul v-animate="{value: 'bounceInRight'}">
                             <li>text</li>
                             <li>text</li>
                             <li>text</li>
@@ -177,19 +175,8 @@
                     dir: 'v',
                     loop: false,
                     duration: 300,
+                    overflow:'scroll',
                     beforeChange: function(elem, current, next) {
-                        var height = elem.getBoundingClientRect().height,
-                            scrollTop = elem.scrollTop,
-                            scrollHeight = elem.scrollHeight;
-
-                        console.log(elem.scrollTop, elem.scrollHeight, elem.getBoundingClientRect())
-                        if (scrollHeight > height) {
-                            if (next > current) { //down
-                                return height + scrollTop >= scrollHeight;
-                            } else { //up
-                                return scrollTop <= 0
-                            }
-                        }
                         console.log('before', current, next)
                     },
                     afterChange: function(elem, current) {
@@ -221,6 +208,10 @@
     }
     var Ctor = Vue.extend(Main)
     var app = new Ctor().$mount('#app')
+    </script>
+    <script src="http://wechatfe.github.io/vconsole/lib/vconsole.min.js?v=3.0.0.0"></script>
+    <script type="text/javascript">
+        window.vConsole = new window.VConsole();
     </script>
 </body>
 

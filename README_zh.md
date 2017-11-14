@@ -27,6 +27,10 @@ npm install animate.css --save
 - `movingFlag` : (default:`false`) 
 - `beforeChange` : (default:`function`) 页面切换前回调
 - `afterChange` : (default:`function`) 页面切换后回调
+- `overflow` : (default:`hidden`) hidden || scroll || auto 处理page中的滚动条
+    `hidden` 隐藏滚动条
+    `scroll` 处理page的滚动条
+    `auto`  处理page中所有元素的滚动条，从触发元素开始检查
 
 ### method
 #### moveTo 
