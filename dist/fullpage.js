@@ -322,10 +322,12 @@ Fullpage.iSWhetherEnds = function (target, direction) {
         return target.scrollTop <= 0;
     } else {
         var height = target.getBoundingClientRect().height;
-        return target.scrollTop + height >= target.scrollHeight;
+        //@TODO wechat devtool v0.7.0 scrollTop 1px less than actual
+        return target.scrollTop + height > target.scrollHeight - 1;
         // down
     }
 };
+
 Fullpage.defaultOptions = {
     start: 0,
     duration: 500,
