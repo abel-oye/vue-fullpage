@@ -1,11 +1,12 @@
 {
   "name": "fullpage-vue",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "vue 2.x fullpage rollup  ",
   "main": "./dist/fullpage.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "rollup -c"
+    "build": "rollup -c",
+    "dev":"rollup -c rollup.config.js  -w"
   },
   "keywords": [
     "vue",

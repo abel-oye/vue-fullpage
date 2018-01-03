@@ -253,6 +253,11 @@ var Fullpage = function () {
                 return;
             }
 
+            // no change
+            if (this.curIndex === curIndex) {
+                return;
+            }
+
             if (!(curIndex >= 0 && curIndex < this.total)) {
                 if (!!this.opts.loop) {
                     curIndex = this.curIndex = curIndex < 0 ? this.total - 1 : 0;
