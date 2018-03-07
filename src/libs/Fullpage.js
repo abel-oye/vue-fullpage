@@ -78,14 +78,14 @@ class Fullpage {
         this.prevIndex = this.curIndex
         if ("ontouchstart" in document) {
             /// touch ///
-            el.addEventListener('touchstart', e => {
+            addEventListener(el,'touchstart', e => {
                 if (this.opts.movingFlag) {
                     return false;
                 }
                 this.startX = e.targetTouches[0].pageX;
                 this.startY = e.targetTouches[0].pageY;
             });
-            el.addEventListener('touchend', e => {
+            addEventListener(el,'touchend', e => {
                 //e.preventDefault();
                 if (this.opts.movingFlag) {
                     return false;
@@ -97,14 +97,15 @@ class Fullpage {
                 let curIndex = der + this.curIndex;
                 this.moveTo(curIndex, true);
             });
-            document.body.addEventListener('touchmove', e => {
+            addEventListener(document.body,'touchmove', e => {
                 let {
                     overflow
                 } = this.opts;
 
                 let currentPage = this.pageEles[this.curIndex];
                 if (overflow === 'hidden') {
-                    e.preventDefault();
+                    //e.preventDefault();
+                    return false
                 } else {
                     let currentTarget = e.target;
                     
@@ -146,6 +147,7 @@ class Fullpage {
             let curIndex = der + this.curIndex;
             this.moveTo(curIndex, true);
         });
+
         let debounceTimer,
             interval = 1200,
             debounce = true;
@@ -175,11 +177,7 @@ class Fullpage {
             this.moveTo(curIndex, true);
         });
         //}
-        addEventListener(el, 'webkitTransitionEnd', () => {
-            this.toogleAnimate(this.curIndex)
-            this.opts.afterChange.call(this, this.pageEles[this.curIndex], this.curIndex)
-            this.opts.movingFlag = false;
-        });
+
         addEventListener(window, 'resize', () => {
             if (el.offsetHeight != this.height) {
                 this.resize();
@@ -222,22 +220,36 @@ class Fullpage {
         let dist = this.opts.dir === 'v' ? (curIndex) * (-this.height) : curIndex * (-this.width)
         this.curIndex = curIndex;
         this.opts.movingFlag = true;
+
+        let fired = false;
+
+        let wrappedCallback = ()=>{
+            removeEventListener(this.el,wrappedCallback);
+            this.toogleAnimate(this.curIndex)
+            this.opts.afterChange.call(this, this.pageEles[this.curIndex], this.curIndex)
+            this.opts.movingFlag = false;
+            fired = true
+        }
+
         if (anim) {
-            this.el.classList.add(this.opts.animateClass)
+            this.el.classList.add(this.opts.animateClass);
+
+            let transition = getCurrentStyle(document.querySelector('.fullpage-wp'),"transition");
+
+            let duration = this.opts.duration || parseFloat(transition.split(" ")[1]) || 0
+
+            addEventListener(this.el, 'webkitTransitionEnd',wrappedCallback);
+
+            setTimeout(()=>{
+                if(fired) return;
+                wrappedCallback()
+            },duration * 1000 +25)
+
         } else {
             this.el.classList.remove(this.opts.animateClass)
         }
         this.move(dist);
-        // const afterChange = () => {
-        //     this.opts.afterChange.call(this, this.pageEles[this.curIndex], this.curIndex, curIndex)
-        //     this.opts.movingFlag = false;
-        // }
-        // window.setTimeout(() => {
-        //     this.toogleAnimate(curIndex)
-        //     if (!anim) {
-        //         afterChange();
-        //     }
-        // }, this.opts.duration)
+
     }
     movePrev() {
         this.moveTo(this.curIndex - 1, true);
@@ -260,6 +272,26 @@ function addEventListener(el, eventName, callback, isUseCapture) {
         el.attachEvent('on' + eventName, callback);
     }
 }
+function removeEventListener(el, eventName, callback, isUseCapture) {
+    if (el.removeEventListener) {
+        el.removeEventListener(eventName, callback, !!isUseCapture);
+    } else {
+        el.detachEvent('on' + eventName, callback);
+    }
+}
+
+function getCurrentStyle (obj, prop) {     
+    if (obj.currentStyle) {        
+        return obj.currentStyle[prop];     
+    }      
+    else if (window.getComputedStyle) {        
+        let propprop = prop.replace (/([A-Z])/g, "-$1");           
+        propprop = prop.toLowerCase ();        
+        return document.defaultView.getComputedStyle (obj,null)[prop];     
+    }      
+    return null;   
+}   
+
 Fullpage.iSWhetherEnds = (target, direction) => {
     if (direction > 0) {
         return target.scrollTop <= 0
@@ -275,7 +307,18 @@ Fullpage.defaultOptions = {
     start: 0,
     duration: 500,
     loop: false,
+    /**
+    * direction
+    * 
+    */
     dir: 'v',
+    /**
+    * der
+    * The proportion of move
+    * e.g.
+    *   container height = 100
+    *   moving distance >= 100 * der (default:0.1)
+    */
     der: 0.1,
     movingFlag: false,
     /**

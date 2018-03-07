@@ -1,6 +1,6 @@
 {
   "name": "fullpage-vue",
-  "version": "1.6.2",
+  "version": "1.7.0",
   "description": "vue 2.x fullpage rollup  ",
   "main": "./dist/fullpage.js",
   "scripts": {

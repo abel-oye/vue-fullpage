@@ -128,14 +128,14 @@ var Fullpage = function () {
             this.prevIndex = this.curIndex;
             if ("ontouchstart" in document) {
                 /// touch ///
-                el.addEventListener('touchstart', function (e) {
+                addEventListener(el, 'touchstart', function (e) {
                     if (_this2.opts.movingFlag) {
                         return false;
                     }
                     _this2.startX = e.targetTouches[0].pageX;
                     _this2.startY = e.targetTouches[0].pageY;
                 });
-                el.addEventListener('touchend', function (e) {
+                addEventListener(el, 'touchend', function (e) {
                     //e.preventDefault();
                     if (_this2.opts.movingFlag) {
                         return false;
@@ -147,13 +147,14 @@ var Fullpage = function () {
                     var curIndex = der + _this2.curIndex;
                     _this2.moveTo(curIndex, true);
                 });
-                document.body.addEventListener('touchmove', function (e) {
+                addEventListener(document.body, 'touchmove', function (e) {
                     var overflow = _this2.opts.overflow;
 
 
                     var currentPage = _this2.pageEles[_this2.curIndex];
                     if (overflow === 'hidden') {
-                        e.preventDefault();
+                        //e.preventDefault();
+                        return false;
                     } else {
                         var currentTarget = e.target;
 
@@ -194,6 +195,7 @@ var Fullpage = function () {
                 var curIndex = der + _this2.curIndex;
                 _this2.moveTo(curIndex, true);
             });
+
             var debounceTimer = void 0,
                 interval = 1200,
                 debounce = true;
@@ -223,11 +225,7 @@ var Fullpage = function () {
                 _this2.moveTo(curIndex, true);
             });
             //}
-            addEventListener(el, 'webkitTransitionEnd', function () {
-                _this2.toogleAnimate(_this2.curIndex);
-                _this2.opts.afterChange.call(_this2, _this2.pageEles[_this2.curIndex], _this2.curIndex);
-                _this2.opts.movingFlag = false;
-            });
+
             addEventListener(window, 'resize', function () {
                 if (el.offsetHeight != _this2.height) {
                     _this2.resize();
@@ -249,6 +247,8 @@ var Fullpage = function () {
     }, {
         key: 'moveTo',
         value: function moveTo(curIndex, anim) {
+            var _this3 = this;
+
             if (this.opts.overflow === 'scroll' && !Fullpage.iSWhetherEnds(this.pageEles[this.curIndex], this.direction)) {
                 return;
             }
@@ -274,22 +274,34 @@ var Fullpage = function () {
             var dist = this.opts.dir === 'v' ? curIndex * -this.height : curIndex * -this.width;
             this.curIndex = curIndex;
             this.opts.movingFlag = true;
+
+            var fired = false;
+
+            var wrappedCallback = function wrappedCallback() {
+                removeEventListener(_this3.el, wrappedCallback);
+                _this3.toogleAnimate(_this3.curIndex);
+                _this3.opts.afterChange.call(_this3, _this3.pageEles[_this3.curIndex], _this3.curIndex);
+                _this3.opts.movingFlag = false;
+                fired = true;
+            };
+
             if (anim) {
                 this.el.classList.add(this.opts.animateClass);
+
+                var transition = getCurrentStyle(document.querySelector('.fullpage-wp'), "transition");
+
+                var duration = this.opts.duration || parseFloat(transition.split(" ")[1]) || 0;
+
+                addEventListener(this.el, 'webkitTransitionEnd', wrappedCallback);
+
+                setTimeout(function () {
+                    if (fired) return;
+                    wrappedCallback();
+                }, duration * 1000 + 25);
             } else {
                 this.el.classList.remove(this.opts.animateClass);
             }
             this.move(dist);
-            // const afterChange = () => {
-            //     this.opts.afterChange.call(this, this.pageEles[this.curIndex], this.curIndex, curIndex)
-            //     this.opts.movingFlag = false;
-            // }
-            // window.setTimeout(() => {
-            //     this.toogleAnimate(curIndex)
-            //     if (!anim) {
-            //         afterChange();
-            //     }
-            // }, this.opts.duration)
         }
     }, {
         key: 'movePrev',
@@ -322,6 +334,25 @@ function addEventListener(el, eventName, callback, isUseCapture) {
         el.attachEvent('on' + eventName, callback);
     }
 }
+function removeEventListener(el, eventName, callback, isUseCapture) {
+    if (el.removeEventListener) {
+        el.removeEventListener(eventName, callback, !!isUseCapture);
+    } else {
+        el.detachEvent('on' + eventName, callback);
+    }
+}
+
+function getCurrentStyle(obj, prop) {
+    if (obj.currentStyle) {
+        return obj.currentStyle[prop];
+    } else if (window.getComputedStyle) {
+        var propprop = prop.replace(/([A-Z])/g, "-$1");
+        propprop = prop.toLowerCase();
+        return document.defaultView.getComputedStyle(obj, null)[prop];
+    }
+    return null;
+}
+
 Fullpage.iSWhetherEnds = function (target, direction) {
     if (direction > 0) {
         return target.scrollTop <= 0;
@@ -337,7 +368,18 @@ Fullpage.defaultOptions = {
     start: 0,
     duration: 500,
     loop: false,
+    /**
+    * direction
+    * 
+    */
     dir: 'v',
+    /**
+    * der
+    * The proportion of move
+    * e.g.
+    *   container height = 100
+    *   moving distance >= 100 * der (default:0.1)
+    */
     der: 0.1,
     movingFlag: false,
     /**
