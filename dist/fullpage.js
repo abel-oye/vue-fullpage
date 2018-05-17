@@ -126,7 +126,7 @@ var Fullpage = function () {
             var _this2 = this;
 
             this.prevIndex = this.curIndex;
-            if ("ontouchstart" in document) {
+            if ('ontouchstart' in document) {
                 /// touch ///
                 addEventListener(el, 'touchstart', function (e) {
                     if (_this2.opts.movingFlag) {
@@ -214,7 +214,7 @@ var Fullpage = function () {
                     debounce = true;
                 }, interval);
                 var dir = _this2.opts.dir;
-                // 兼容 DOMMouseScroll event.detail 
+                // 兼容 DOMMouseScroll event.detail
                 if (!e.wheelDelta) {
                     e.deltaY = e.detail;
                     e.deltaX = e.detail;
@@ -278,7 +278,7 @@ var Fullpage = function () {
             var fired = false;
 
             var wrappedCallback = function wrappedCallback() {
-                removeEventListener(_this3.el, wrappedCallback);
+                removeEventListener(_this3.el, 'webkitTransitionEnd', wrappedCallback);
                 _this3.toogleAnimate(_this3.curIndex);
                 _this3.opts.afterChange.call(_this3, _this3.pageEles[_this3.curIndex], _this3.curIndex);
                 _this3.opts.movingFlag = false;
@@ -288,9 +288,9 @@ var Fullpage = function () {
             if (anim) {
                 this.el.classList.add(this.opts.animateClass);
 
-                var transition = getCurrentStyle(document.querySelector('.fullpage-wp'), "transition");
+                var transition = getCurrentStyle(document.querySelector('.fullpage-wp'), 'transition');
 
-                var duration = this.opts.duration || parseFloat(transition.split(" ")[1]) || 0;
+                var duration = this.opts.duration || parseFloat(transition.split(' ')[1]) || 0;
 
                 addEventListener(this.el, 'webkitTransitionEnd', wrappedCallback);
 
@@ -346,7 +346,7 @@ function getCurrentStyle(obj, prop) {
     if (obj.currentStyle) {
         return obj.currentStyle[prop];
     } else if (window.getComputedStyle) {
-        var propprop = prop.replace(/([A-Z])/g, "-$1");
+        var propprop = prop.replace(/([A-Z])/g, '-$1');
         propprop = prop.toLowerCase();
         return document.defaultView.getComputedStyle(obj, null)[prop];
     }
@@ -369,17 +369,17 @@ Fullpage.defaultOptions = {
     duration: 500,
     loop: false,
     /**
-    * direction
-    * 
-    */
+     * direction
+     *
+     */
     dir: 'v',
     /**
-    * der
-    * The proportion of move
-    * e.g.
-    *   container height = 100
-    *   moving distance >= 100 * der (default:0.1)
-    */
+     * der
+     * The proportion of move
+     * e.g.
+     *   container height = 100
+     *   moving distance >= 100 * der (default:0.1)
+     */
     der: 0.1,
     movingFlag: false,
     /**
@@ -388,7 +388,7 @@ Fullpage.defaultOptions = {
      *     element {Element} current element
      *     currenIndex {Number} current number
      *     next    {Number}  next nummober
-     *         
+     *
      * @type {Boolean}
      */
     beforeChange: noop,
@@ -397,7 +397,7 @@ Fullpage.defaultOptions = {
      * @params
      *     element {Element} current element
      *     currenIndex {Number} current number
-     *         
+     *
      * @type {Boolean}
      */
     afterChange: noop,
