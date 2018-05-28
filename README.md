@@ -48,7 +48,7 @@ Move to the previous page
 #### moveNext
  Move to the next page
 
-#### $upadte
+#### $update
 Update the dom structure,for example `v-for` and `v-if` Affect the number of pages, need to manually call `$update`
 
 ```html
