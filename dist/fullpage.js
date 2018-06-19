@@ -202,6 +202,7 @@ var Fullpage = function () {
             // fixed firefox DOMMouseScroll closed #1.
             var mousewheelType = document.mozFullScreen !== undefined ? 'DOMMouseScroll' : 'mousewheel';
             addEventListener(el, mousewheelType, function (e) {
+
                 if (_this2.opts.movingFlag) {
                     return false;
                 }
@@ -214,13 +215,11 @@ var Fullpage = function () {
                     debounce = true;
                 }, interval);
                 var dir = _this2.opts.dir;
-                // 兼容 DOMMouseScroll event.detail
-                if (!e.wheelDelta) {
-                    e.deltaY = e.detail;
-                    e.deltaX = e.detail;
-                }
-                var sub = _this2.direction = dir === 'v' ? e.deltaY : e.deltaX;
-                var der = sub > 0 ? 1 : sub < 0 ? -1 : 0;
+                // Compatible DOMMouseScroll event.detail
+                var detail = e.wheelDelta ? e.wheelDelta / 120 : e.detail;
+
+                //Only support Y
+                var der = detail > 0 ? 1 : detail < 0 ? -1 : 0;
                 var curIndex = der + _this2.curIndex;
                 _this2.moveTo(curIndex, true);
             });

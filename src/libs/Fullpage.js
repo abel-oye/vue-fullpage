@@ -174,6 +174,7 @@ class Fullpage {
                 ? 'DOMMouseScroll'
                 : 'mousewheel'
         addEventListener(el, mousewheelType, e => {
+
             if (this.opts.movingFlag) {
                 return false
             }
@@ -186,13 +187,11 @@ class Fullpage {
                 debounce = true
             }, interval)
             let dir = this.opts.dir
-            // 兼容 DOMMouseScroll event.detail
-            if (!e.wheelDelta) {
-                e.deltaY = e.detail
-                e.deltaX = e.detail
-            }
-            let sub = (this.direction = dir === 'v' ? e.deltaY : e.deltaX)
-            let der = sub > 0 ? 1 : sub < 0 ? -1 : 0
+            // Compatible DOMMouseScroll event.detail
+            let detail = e.wheelDelta ? e.wheelDelta / 120 : e.detail
+
+            //Only support Y
+            let der = detail > 0 ? 1 : detail < 0 ? -1 : 0
             let curIndex = der + this.curIndex
             this.moveTo(curIndex, true)
         })
