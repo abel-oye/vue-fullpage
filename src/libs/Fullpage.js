@@ -260,7 +260,7 @@ class Fullpage {
                 ? curIndex * -this.height
                 : curIndex * -this.width
         this.curIndex = curIndex
-        this.opts.movingFlag = true
+        
 
         let fired = false
 
@@ -278,6 +278,7 @@ class Fullpage {
 
         if (anim) {
             this.el.classList.add(this.opts.animateClass)
+            this.opts.movingFlag = true
 
             let transition = getCurrentStyle(
                 document.querySelector('.fullpage-wp'),

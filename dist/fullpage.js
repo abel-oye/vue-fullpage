@@ -270,7 +270,6 @@ var Fullpage = function () {
             }
             var dist = this.opts.dir === 'v' ? curIndex * -this.height : curIndex * -this.width;
             this.curIndex = curIndex;
-            this.opts.movingFlag = true;
 
             var fired = false;
 
@@ -284,6 +283,7 @@ var Fullpage = function () {
 
             if (anim) {
                 this.el.classList.add(this.opts.animateClass);
+                this.opts.movingFlag = true;
 
                 var transition = getCurrentStyle(document.querySelector('.fullpage-wp'), 'transition');
 
