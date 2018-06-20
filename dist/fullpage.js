@@ -51,7 +51,7 @@ var Fullpage = function () {
         this.assignOpts(options);
         this.vnode = vnode;
         this.vm = vnode.context;
-        this.curIndex = this.opts.start;
+
         this.startY = 0;
         this.opts.movingFlag = false;
         this.el = el;
@@ -67,11 +67,9 @@ var Fullpage = function () {
         window.setTimeout(function () {
             _this.resize();
             //The first page triggers the animation directly
-            if (_this.curIndex === 0) {
-                _this.toogleAnimate(_this.curIndex);
-            } else {
-                _this.moveTo(_this.curIndex, false);
-            }
+            _this.moveTo(_this.opts.start, false);
+            _this.toogleAnimate(_this.opts.start);
+            _this.curIndex = _this.opts.start;
         }, 0);
     }
 

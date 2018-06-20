@@ -17,7 +17,7 @@ class Fullpage {
         this.assignOpts(options)
         this.vnode = vnode
         this.vm = vnode.context
-        this.curIndex = this.opts.start
+        
         this.startY = 0
         this.opts.movingFlag = false
         this.el = el
@@ -33,11 +33,9 @@ class Fullpage {
         window.setTimeout(() => {
             this.resize()
             //The first page triggers the animation directly
-            if (this.curIndex === 0) {
-                this.toogleAnimate(this.curIndex)
-            } else {
-                this.moveTo(this.curIndex, false)
-            }
+            this.moveTo(this.opts.start, false)
+            this.toogleAnimate(this.opts.start)
+            this.curIndex = this.opts.start
         }, 0)
     }
     resize() {
