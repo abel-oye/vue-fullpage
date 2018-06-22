@@ -186,10 +186,11 @@ class Fullpage {
             }, interval)
             let dir = this.opts.dir
             // Compatible DOMMouseScroll event.detail
+            // see http://www.javascriptkit.com/javatutors/onmousewheel.shtml
             let detail = e.wheelDelta ? e.wheelDelta / 120 : e.detail
-
+            console.log(detail)
             //Only support Y
-            let der = detail > 0 ? 1 : detail < 0 ? -1 : 0
+            let der = detail > 0 ? -1 : detail < 0 ? 1 : 0
             let curIndex = der + this.curIndex
             this.moveTo(curIndex, true)
         })

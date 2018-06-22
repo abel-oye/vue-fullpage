@@ -7,7 +7,7 @@
 To achieve sigle-page scroll in mobile, support horizontal scroll and vertical scroll, support all the animation instructions of animate.css.
 
 ## Online demo
-here's a [jsfiddle demo](https://jsfiddle.net/e23jiang/6jc3okaq/1/)
+here's a [jsfiddle demo](https://jsfiddle.net/6jc3okaq/98/)
 [Live demo](https://river-lee.github.io/vue-fullpage/examples)
 
 ## Installation
