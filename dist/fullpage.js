@@ -71,6 +71,11 @@ var Fullpage = function () {
             _this.toogleAnimate(_this.opts.start);
             _this.curIndex = _this.opts.start;
         }, 0);
+
+        addEventListener(window, 'resize', function () {
+            _this.resize();
+            _this.correct();
+        });
     }
 
     createClass(Fullpage, [{
@@ -88,6 +93,16 @@ var Fullpage = function () {
                 //pageEle.style.width = this.width + 'px'
                 pageEle.style.height = this.height + 'px';
             }
+        }
+    }, {
+        key: 'correct',
+        value: function correct() {
+            //Correct position after onresize
+            if (this.current === 0) {
+                return;
+            }
+            var dist = this.opts.dir === 'v' ? this.curIndex * -this.height : this.curIndex * -this.width;
+            this.move(dist);
         }
     }, {
         key: 'setOptions',
@@ -270,6 +285,7 @@ var Fullpage = function () {
                 return false;
             }
             var dist = this.opts.dir === 'v' ? curIndex * -this.height : curIndex * -this.width;
+
             this.curIndex = curIndex;
 
             var fired = false;

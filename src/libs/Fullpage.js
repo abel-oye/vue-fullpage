@@ -37,6 +37,11 @@ class Fullpage {
             this.toogleAnimate(this.opts.start)
             this.curIndex = this.opts.start
         }, 0)
+
+        addEventListener(window,'resize',()=>{
+            this.resize()
+            this.correct()
+        })
     }
     resize() {
         this.width = this.opts.width || this.el.offsetWidth
@@ -51,6 +56,18 @@ class Fullpage {
             //pageEle.style.width = this.width + 'px'
             pageEle.style.height = this.height + 'px'
         }
+    }
+    correct(){
+        //Correct position after onresize
+        if(this.current === 0){
+            return
+        }
+        let dist =
+            this.opts.dir === 'v'
+                ? this.curIndex * -this.height
+                : this.curIndex * -this.width
+        this.move(dist)
+
     }
     setOptions(options) {
         this.assignOpts(options, this.opts)
@@ -260,6 +277,7 @@ class Fullpage {
             this.opts.dir === 'v'
                 ? curIndex * -this.height
                 : curIndex * -this.width
+
         this.curIndex = curIndex
         
 
