@@ -1,15 +1,16 @@
 /**
  * vue2.x fullpage
  */
-function broadcast(children, eventName, params) {
+function broadcast(children, eventName, params, ancestor ) {
     let context
+    let currentIndex;
     children &&
         children.forEach(child => {
             context = child.context
             if (context) {
                 context.$emit.apply(context, [eventName].concat(params))
             }
-            broadcast(child.children, eventName, params)
+            broadcast(child.children, eventName, params, )
         })
 }
 class Fullpage {

@@ -1,35 +1,44 @@
 class Animate {
 	constructor(el, binding, vnode) {
-		const that = this,
-			vm = vnode.context,
+		const vm = vnode.context,
 			aminate = binding.value;
 
-		el.style.opacity = '0'
-		vm.$on('toogle.animate', function(curIndex) {
-			const curPage = +el.parentNode.getAttribute('data-id')
+		el.style.opacity = "0";
+		vm.$on("toogle.animate", curIndex => {
+			const curPage = this.getClosestId(el.parentNode);
 			if (curIndex === curPage) {
-				that.addAnimated(el, aminate)
+				this.addAnimated(el, aminate);
 			} else {
-				el.style.opacity = '0'
-				that.removeAnimated(el, aminate)
+				el.style.opacity = "0";
+				this.removeAnimated(el, aminate);
 			}
-		})
+		});
+	}
+	getClosestId(elem) {
+		let id;
+		while (elem && elem.nodeType !== 9) {
+			id = +elem.getAttribute("data-id");
+			if (id) {
+				break;
+			}
+			elem = elem.parentNode;
+		}
+		return id;
 	}
 	addAnimated(el, animate) {
-		const delay = animate.delay || 0
-		el.classList.add('animated')
-		window.setTimeout(function() {
-			el.style.opacity = '1'
-			el.classList.add(animate.value)
-		}, delay)
+		const delay = animate.delay || 0;
+		el.classList.add("animated");
+		window.setTimeout(() => {
+			el.style.opacity = "1";
+			el.classList.add(animate.value);
+		}, delay);
 	}
 	removeAnimated(el, animate) {
-		const cls = el.getAttribute('class');
-		if (cls && cls.indexOf('animated') > -1) {
-			el.classList.remove(animate.value)
+		const cls = el.getAttribute("class");
+		if (cls && cls.indexOf("animated") > -1) {
+			el.classList.remove(animate.value);
 		}
 	}
-
 }
 
 export default Animate;

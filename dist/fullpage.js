@@ -31,8 +31,9 @@ var createClass = function () {
 /**
  * vue2.x fullpage
  */
-function broadcast(children, eventName, params) {
+function broadcast(children, eventName, params, ancestor) {
     var context = void 0;
+    var currentIndex = void 0;
     children && children.forEach(function (child) {
         context = child.context;
         if (context) {
@@ -430,39 +431,53 @@ function noop() {}
 
 var Animate = function () {
 	function Animate(el, binding, vnode) {
+		var _this = this;
+
 		classCallCheck(this, Animate);
 
-		var that = this,
-		    vm = vnode.context,
+		var vm = vnode.context,
 		    aminate = binding.value;
 
-		el.style.opacity = '0';
-		vm.$on('toogle.animate', function (curIndex) {
-			var curPage = +el.parentNode.getAttribute('data-id');
+		el.style.opacity = "0";
+		vm.$on("toogle.animate", function (curIndex) {
+			var curPage = _this.getClosestId(el.parentNode);
 			if (curIndex === curPage) {
-				that.addAnimated(el, aminate);
+				_this.addAnimated(el, aminate);
 			} else {
-				el.style.opacity = '0';
-				that.removeAnimated(el, aminate);
+				el.style.opacity = "0";
+				_this.removeAnimated(el, aminate);
 			}
 		});
 	}
 
 	createClass(Animate, [{
-		key: 'addAnimated',
+		key: "getClosestId",
+		value: function getClosestId(elem) {
+			var id = void 0;
+			while (elem && elem.nodeType !== 9) {
+				id = +elem.getAttribute("data-id");
+				if (id) {
+					break;
+				}
+				elem = elem.parentNode;
+			}
+			return id;
+		}
+	}, {
+		key: "addAnimated",
 		value: function addAnimated(el, animate) {
 			var delay = animate.delay || 0;
-			el.classList.add('animated');
+			el.classList.add("animated");
 			window.setTimeout(function () {
-				el.style.opacity = '1';
+				el.style.opacity = "1";
 				el.classList.add(animate.value);
 			}, delay);
 		}
 	}, {
-		key: 'removeAnimated',
+		key: "removeAnimated",
 		value: function removeAnimated(el, animate) {
-			var cls = el.getAttribute('class');
-			if (cls && cls.indexOf('animated') > -1) {
+			var cls = el.getAttribute("class");
+			if (cls && cls.indexOf("animated") > -1) {
 				el.classList.remove(animate.value);
 			}
 		}
