@@ -56,12 +56,13 @@ var Fullpage = function () {
         this.startY = 0;
         this.opts.movingFlag = false;
         this.el = el;
-        this.el.classList.add('fullpage-wp');
+        this.el.classList.add("fullpage-wp");
         this.parentEle = this.el.parentNode;
-        this.parentEle.classList.add('fullpage-container');
+        this.parentEle.classList.add("fullpage-container");
         this.pageEles = this.el.children;
         this.total = this.pageEles.length;
         this.direction = -1;
+        this.curIndex = this.opts.start;
 
         this.initScrollDirection();
         this.initEvent(el);
@@ -73,14 +74,14 @@ var Fullpage = function () {
             _this.curIndex = _this.opts.start;
         }, 0);
 
-        addEventListener(window, 'resize', function () {
+        addEventListener(window, "resize", function () {
             _this.resize();
             _this.correct();
         });
     }
 
     createClass(Fullpage, [{
-        key: 'resize',
+        key: "resize",
         value: function resize() {
             this.width = this.opts.width || this.el.offsetWidth;
             this.height = this.opts.height || this.el.offsetHeight;
@@ -89,34 +90,34 @@ var Fullpage = function () {
                 pageEle = void 0;
             for (; i < length; i++) {
                 pageEle = this.pageEles[i];
-                pageEle.setAttribute('data-id', i);
-                pageEle.classList.add('page');
+                pageEle.setAttribute("data-id", i);
+                pageEle.classList.add("page");
                 //pageEle.style.width = this.width + 'px'
-                pageEle.style.height = this.height + 'px';
+                pageEle.style.height = this.height + "px";
             }
         }
     }, {
-        key: 'correct',
+        key: "correct",
         value: function correct() {
             //Correct position after onresize
             if (this.current === 0) {
                 return;
             }
-            var dist = this.opts.dir === 'v' ? this.curIndex * -this.height : this.curIndex * -this.width;
+            var dist = this.opts.dir === "v" ? this.curIndex * -this.height : this.curIndex * -this.width;
             this.move(dist);
         }
     }, {
-        key: 'setOptions',
+        key: "setOptions",
         value: function setOptions(options) {
             this.assignOpts(options, this.opts);
         }
     }, {
-        key: 'toogleAnimate',
+        key: "toogleAnimate",
         value: function toogleAnimate(curIndex) {
-            broadcast(this.vnode.children, 'toogle.animate', curIndex);
+            broadcast(this.vnode.children, "toogle.animate", curIndex);
         }
     }, {
-        key: 'assignOpts',
+        key: "assignOpts",
         value: function assignOpts(opts, o) {
             o = o || Fullpage.defaultOptions;
             opts = opts || {};
@@ -128,52 +129,52 @@ var Fullpage = function () {
             this.opts = o;
         }
     }, {
-        key: 'initScrollDirection',
+        key: "initScrollDirection",
         value: function initScrollDirection() {
-            if (this.opts.dir !== 'v') {
-                this.el.classList.add('fullpage-wp-h');
+            if (this.opts.dir !== "v") {
+                this.el.classList.add("fullpage-wp-h");
             }
         }
     }, {
-        key: 'initEvent',
+        key: "initEvent",
         value: function initEvent(el) {
             var _this2 = this;
 
             this.prevIndex = this.curIndex;
-            if ('ontouchstart' in document) {
+            if ("ontouchstart" in document) {
                 /// touch ///
-                addEventListener(el, 'touchstart', function (e) {
+                addEventListener(el, "touchstart", function (e) {
                     if (_this2.opts.movingFlag) {
                         return false;
                     }
                     _this2.startX = e.targetTouches[0].pageX;
                     _this2.startY = e.targetTouches[0].pageY;
                 });
-                addEventListener(el, 'touchend', function (e) {
+                addEventListener(el, "touchend", function (e) {
                     //e.preventDefault();
                     if (_this2.opts.movingFlag) {
                         return false;
                     }
                     var preIndex = _this2.curIndex;
                     var dir = _this2.opts.dir;
-                    var sub = _this2.direction = dir === 'v' ? (e.changedTouches[0].pageY - _this2.startY) / _this2.height : (e.changedTouches[0].pageX - _this2.startX) / _this2.width;
+                    var sub = _this2.direction = dir === "v" ? (e.changedTouches[0].pageY - _this2.startY) / _this2.height : (e.changedTouches[0].pageX - _this2.startX) / _this2.width;
                     var der = sub > _this2.opts.der ? -1 : sub < -_this2.opts.der ? 1 : 0;
                     var curIndex = der + _this2.curIndex;
                     _this2.moveTo(curIndex, true);
                 });
-                addEventListener(document.body, 'touchmove', function (e) {
+                addEventListener(document.body, "touchmove", function (e) {
                     var overflow = _this2.opts.overflow;
 
 
                     var currentPage = _this2.pageEles[_this2.curIndex];
-                    if (overflow === 'hidden') {
+                    if (overflow === "hidden") {
                         //e.preventDefault();
                         return false;
                     } else {
                         var currentTarget = e.target;
 
                         while (currentTarget) {
-                            if (overflow === 'scroll' && currentTarget === currentPage || overflow !== 'scroll' && currentTarget !== currentPage) {
+                            if (overflow === "scroll" && currentTarget === currentPage || overflow !== "scroll" && currentTarget !== currentPage) {
                                 if (!Fullpage.iSWhetherEnds(currentTarget, _this2.direction)) {
                                     return;
                                 }
@@ -187,7 +188,7 @@ var Fullpage = function () {
             }
             //else {
             var isMousedown = false;
-            addEventListener(el, 'mousedown', function (e) {
+            addEventListener(el, "mousedown", function (e) {
                 if (_this2.opts.movingFlag) {
                     return false;
                 }
@@ -195,16 +196,16 @@ var Fullpage = function () {
                 _this2.startX = e.pageX;
                 _this2.startY = e.pageY;
             });
-            addEventListener(el, 'mouseup', function (e) {
+            addEventListener(el, "mouseup", function (e) {
                 isMousedown = false;
             });
-            addEventListener(el, 'mousemove', function (e) {
+            addEventListener(el, "mousemove", function (e) {
                 //e.preventDefault();
                 if (_this2.opts.movingFlag || !isMousedown) {
                     return false;
                 }
                 var dir = _this2.opts.dir;
-                var sub = _this2.direction = dir === 'v' ? (e.pageY - _this2.startY) / _this2.height : (e.pageX - _this2.startX) / _this2.width;
+                var sub = _this2.direction = dir === "v" ? (e.pageY - _this2.startY) / _this2.height : (e.pageX - _this2.startX) / _this2.width;
                 var der = sub > _this2.opts.der ? -1 : sub < -_this2.opts.der ? 1 : 0;
                 var curIndex = der + _this2.curIndex;
                 _this2.moveTo(curIndex, true);
@@ -214,9 +215,9 @@ var Fullpage = function () {
                 interval = 1200,
                 debounce = true;
             // fixed firefox DOMMouseScroll closed #1.
-            var mousewheelType = document.mozFullScreen !== undefined ? 'DOMMouseScroll' : 'mousewheel';
-            addEventListener(el, mousewheelType, function (e) {
+            var mousewheelType = document.mozFullScreen !== undefined ? "DOMMouseScroll" : "mousewheel";
 
+            addEventListener(el, mousewheelType, function (e) {
                 if (_this2.opts.movingFlag) {
                     return false;
                 }
@@ -232,38 +233,46 @@ var Fullpage = function () {
                 // Compatible DOMMouseScroll event.detail
                 // see http://www.javascriptkit.com/javatutors/onmousewheel.shtml
                 var detail = e.wheelDelta ? e.wheelDelta / 120 : e.detail;
-                console.log(detail);
+                //let detail = e.detail ? e.detail * -120 : e.wheelDelta;
+                console.log(e.wheelDelta);
                 //Only support Y
-                var der = detail > 0 ? -1 : detail < 0 ? 1 : 0;
+                var der = _this2.direction = detail > 0 ? -1 : detail < 0 ? 1 : 0;
                 var curIndex = der + _this2.curIndex;
                 _this2.moveTo(curIndex, true);
+
+                if (e.preventDefault) {
+                    //disable default wheel action of scrolling page
+                    e.preventDefault();
+                } else {
+                    return false;
+                }
             });
             //}
 
-            addEventListener(window, 'resize', function () {
+            addEventListener(window, "resize", function () {
                 if (el.offsetHeight != _this2.height) {
                     _this2.resize();
                 }
             });
         }
     }, {
-        key: 'move',
+        key: "move",
         value: function move(dist) {
             var xPx = 0,
                 yPx = 0;
-            if (this.opts.dir === 'v') {
+            if (this.opts.dir === "v") {
                 yPx = dist;
             } else {
                 xPx = dist;
             }
-            this.el.style.cssText += ';-webkit-transform : translate3d(' + xPx + 'px, ' + yPx + 'px, 0px);' + 'transform : translate3d(' + xPx + 'px, ' + yPx + 'px, 0px);';
+            this.el.style.cssText += ";-webkit-transform : translate3d(" + xPx + "px, " + yPx + "px, 0px);" + "transform : translate3d(" + xPx + "px, " + yPx + "px, 0px);";
         }
     }, {
-        key: 'moveTo',
+        key: "moveTo",
         value: function moveTo(curIndex, anim) {
             var _this3 = this;
 
-            if (this.opts.overflow === 'scroll' && !Fullpage.iSWhetherEnds(this.pageEles[this.curIndex], this.direction)) {
+            if (this.opts.overflow === "scroll" && !Fullpage.iSWhetherEnds(this.pageEles[this.curIndex], this.direction)) {
                 return;
             }
 
@@ -285,14 +294,14 @@ var Fullpage = function () {
             if (flag === false) {
                 return false;
             }
-            var dist = this.opts.dir === 'v' ? curIndex * -this.height : curIndex * -this.width;
+            var dist = this.opts.dir === "v" ? curIndex * -this.height : curIndex * -this.width;
 
             this.curIndex = curIndex;
 
             var fired = false;
 
             var wrappedCallback = function wrappedCallback() {
-                removeEventListener(_this3.el, 'webkitTransitionEnd', wrappedCallback);
+                removeEventListener(_this3.el, "webkitTransitionEnd", wrappedCallback);
                 _this3.toogleAnimate(_this3.curIndex);
                 _this3.opts.afterChange.call(_this3, _this3.pageEles[_this3.curIndex], _this3.curIndex);
                 _this3.opts.movingFlag = false;
@@ -303,11 +312,11 @@ var Fullpage = function () {
                 this.el.classList.add(this.opts.animateClass);
                 this.opts.movingFlag = true;
 
-                var transition = getCurrentStyle(document.querySelector('.fullpage-wp'), 'transition');
+                var transition = getCurrentStyle(document.querySelector(".fullpage-wp"), "transition");
 
-                var duration = this.opts.duration || parseFloat(transition.split(' ')[1]) || 0;
+                var duration = this.opts.duration || parseFloat(transition.split(" ")[1]) || 0;
 
-                addEventListener(this.el, 'webkitTransitionEnd', wrappedCallback);
+                addEventListener(this.el, "webkitTransitionEnd", wrappedCallback);
 
                 setTimeout(function () {
                     if (fired) return;
@@ -319,24 +328,24 @@ var Fullpage = function () {
             this.move(dist);
         }
     }, {
-        key: 'movePrev',
+        key: "movePrev",
         value: function movePrev() {
             this.moveTo(this.curIndex - 1, true);
         }
     }, {
-        key: 'moveNext',
+        key: "moveNext",
         value: function moveNext() {
             this.moveTo(this.curIndex + 1, true);
         }
     }, {
-        key: 'update',
+        key: "update",
         value: function update() {
             this.pageEles = this.el.children;
             this.total = this.pageEles.length;
             this.resize();
         }
     }, {
-        key: 'destroy',
+        key: "destroy",
         value: function destroy() {}
     }]);
     return Fullpage;
@@ -346,14 +355,14 @@ function addEventListener(el, eventName, callback, isUseCapture) {
     if (el.addEventListener) {
         el.addEventListener(eventName, callback, !!isUseCapture);
     } else {
-        el.attachEvent('on' + eventName, callback);
+        el.attachEvent("on" + eventName, callback);
     }
 }
 function removeEventListener(el, eventName, callback, isUseCapture) {
     if (el.removeEventListener) {
         el.removeEventListener(eventName, callback, !!isUseCapture);
     } else {
-        el.detachEvent('on' + eventName, callback);
+        el.detachEvent("on" + eventName, callback);
     }
 }
 
@@ -361,7 +370,7 @@ function getCurrentStyle(obj, prop) {
     if (obj.currentStyle) {
         return obj.currentStyle[prop];
     } else if (window.getComputedStyle) {
-        var propprop = prop.replace(/([A-Z])/g, '-$1');
+        var propprop = prop.replace(/([A-Z])/g, "-$1");
         propprop = prop.toLowerCase();
         return document.defaultView.getComputedStyle(obj, null)[prop];
     }
@@ -369,7 +378,7 @@ function getCurrentStyle(obj, prop) {
 }
 
 Fullpage.iSWhetherEnds = function (target, direction) {
-    if (direction > 0) {
+    if (direction < 0) {
         return target.scrollTop <= 0;
     } else {
         var height = target.getBoundingClientRect().height;
@@ -387,7 +396,7 @@ Fullpage.defaultOptions = {
      * direction
      *
      */
-    dir: 'v',
+    dir: "v",
     /**
      * der
      * The proportion of move
@@ -416,7 +425,7 @@ Fullpage.defaultOptions = {
      * @type {Boolean}
      */
     afterChange: noop,
-    animateClass: 'anim',
+    animateClass: "anim",
     /*
      *    There are scroll bars in the page,
      *    `auto` Detect any element in page 
@@ -424,7 +433,7 @@ Fullpage.defaultOptions = {
      *    `hidden` ignores the scroll bar in the page
      *   @default hidden 
      */
-    overflow: 'hidden'
+    overflow: "hidden"
 };
 
 function noop() {}

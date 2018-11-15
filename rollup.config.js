@@ -8,7 +8,7 @@ export default {
   moduleName: "fullpage",
   plugins: [
   	serve({
-  	  contentBase: ["dist", "examples"]
+  	  contentBase: ["."]
   	}),
     babel({
       exclude: 'node_modules/**' // only transpile our source code
