@@ -106,7 +106,11 @@ export default {
       opts: {
         start: 0,
         dir: 'v',
-        duration: 500
+        duration: 500,
+        beforeChange: function (currentSlideEl,currenIndex,nextIndex) {
+        },
+        afterChange: function (currentSlideEl,currenIndex,nextIndex) {
+        }
       }
     }
   },

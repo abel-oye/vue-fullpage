@@ -119,9 +119,9 @@ export default {
         start: 0,
         dir: 'v',
         duration: 500,
-        beforeChange: function (prev, next) {
+        beforeChange: function (currentSlideEl,currenIndex,nextIndex) {
         },
-        afterChange: function (prev, next) {
+        afterChange: function (currentSlideEl,currenIndex,nextIndex) {
         }
       }
     }
