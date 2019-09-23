@@ -64,6 +64,8 @@ var Fullpage = function () {
         this.direction = -1;
         this.curIndex = this.opts.start;
 
+        this.disabled = !!this.opts.disabled;
+
         this.initScrollDirection();
         this.initEvent(el);
         window.setTimeout(function () {
@@ -272,7 +274,7 @@ var Fullpage = function () {
         value: function moveTo(curIndex, anim) {
             var _this3 = this;
 
-            if (this.opts.overflow === "scroll" && !Fullpage.iSWhetherEnds(this.pageEles[this.curIndex], this.direction)) {
+            if (this.opts.overflow === "scroll" && !Fullpage.iSWhetherEnds(this.pageEles[this.curIndex], this.direction) || anim && this.disabled === true) {
                 return;
             }
 
@@ -345,6 +347,11 @@ var Fullpage = function () {
             this.resize();
         }
     }, {
+        key: "setDisabled",
+        value: function setDisabled(disabled) {
+            this.disabled = disabled;
+        }
+    }, {
         key: "destroy",
         value: function destroy() {}
     }]);
@@ -358,6 +365,7 @@ function addEventListener(el, eventName, callback, isUseCapture) {
         el.attachEvent("on" + eventName, callback);
     }
 }
+
 function removeEventListener(el, eventName, callback, isUseCapture) {
     if (el.removeEventListener) {
         el.removeEventListener(eventName, callback, !!isUseCapture);
@@ -405,9 +413,13 @@ Fullpage.defaultOptions = {
      *   moving distance >= 100 * der (default:0.1)
      */
     der: 0.1,
+    /**
+    * 
+    * @property {boolean} defualt:false
+    */
     movingFlag: false,
     /**
-     * beforeChange
+     * Callback before change
      * @params
      *     element {Element} current element
      *     currenIndex {Number} current number
@@ -417,7 +429,9 @@ Fullpage.defaultOptions = {
      */
     beforeChange: noop,
     /**
-     * afterChange
+     * Callback after change
+     *
+     * @function 
      * @params
      *     element {Element} current element
      *     currenIndex {Number} current number
@@ -425,6 +439,10 @@ Fullpage.defaultOptions = {
      * @type {Boolean}
      */
     afterChange: noop,
+    /**
+    * Animate class
+    * @property {string}
+    */
     animateClass: "anim",
     /*
      *    There are scroll bars in the page,
@@ -433,7 +451,12 @@ Fullpage.defaultOptions = {
      *    `hidden` ignores the scroll bar in the page
      *   @default hidden 
      */
-    overflow: "hidden"
+    overflow: "hidden",
+    /**
+    * disabled 
+    * @property {boolean}  default: false
+    */
+    disabled: false
 };
 
 function noop() {}

@@ -74,11 +74,16 @@
         background: rgba(0, 0, 0, .5);
         color: #fff;
     }
+    button.disabled-btn{
+        background: red;
+            color: #fff;
+    }
     </style>
     <div id="app">
         <template>
             <div class="fullpage-container">
                 <div class="button-group">
+                    <button type="button" class="disabled-btn" @click="setDisabled()">Disabled move</button>
                     <button type="button" :class="{active:index ==0}" @click="moveTo(0)">first page</button>
                     <button type="button" :class="{active:index ==1}" @click="moveTo(1)">Second page</button>
                     <button type="button" :class="{active:index ==2}" @click="moveTo(2)">Third page</button>
@@ -120,6 +125,7 @@
             return {
                 index: 0,
                 pageNum: 0,
+                disabled: false,
                 opts: {
                     start: 0,
                     dir: 'v',
@@ -143,6 +149,10 @@
             showPage: function() {
                 this.pageNum++;
                 this.$refs.fullpage.$fullpage.$update();
+            },
+            setDisabled(){
+                this.disabled = !this.disabled
+                this.$refs.fullpage.$fullpage.setDisabled(this.disabled)
             }
         }
     }

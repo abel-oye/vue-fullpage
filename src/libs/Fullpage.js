@@ -30,6 +30,8 @@ class Fullpage {
         this.direction = -1;
         this.curIndex = this.opts.start;
 
+        this.disabled = !!this.opts.disabled;
+
         this.initScrollDirection();
         this.initEvent(el);
         window.setTimeout(() => {
@@ -65,9 +67,9 @@ class Fullpage {
             return;
         }
         let dist =
-            this.opts.dir === "v"
-                ? this.curIndex * -this.height
-                : this.curIndex * -this.width;
+            this.opts.dir === "v" ?
+            this.curIndex * -this.height :
+            this.curIndex * -this.width;
         this.move(dist);
     }
     setOptions(options) {
@@ -110,18 +112,20 @@ class Fullpage {
                 let preIndex = this.curIndex;
                 let dir = this.opts.dir;
                 let sub = (this.direction =
-                    dir === "v"
-                        ? (e.changedTouches[0].pageY - this.startY) /
-                          this.height
-                        : (e.changedTouches[0].pageX - this.startX) /
-                          this.width);
+                    dir === "v" ?
+                    (e.changedTouches[0].pageY - this.startY) /
+                    this.height :
+                    (e.changedTouches[0].pageX - this.startX) /
+                    this.width);
                 let der =
                     sub > this.opts.der ? -1 : sub < -this.opts.der ? 1 : 0;
                 let curIndex = der + this.curIndex;
                 this.moveTo(curIndex, true);
             });
             addEventListener(document.body, "touchmove", e => {
-                let { overflow } = this.opts;
+                let {
+                    overflow
+                } = this.opts;
 
                 let currentPage = this.pageEles[this.curIndex];
                 if (overflow === "hidden") {
@@ -137,12 +141,10 @@ class Fullpage {
                             (overflow !== "scroll" &&
                                 currentTarget !== currentPage)
                         ) {
-                            if (
-                                !Fullpage.iSWhetherEnds(
+                            if (!Fullpage.iSWhetherEnds(
                                     currentTarget,
                                     this.direction
-                                )
-                            ) {
+                                )) {
                                 return;
                             }
                         }
@@ -173,9 +175,9 @@ class Fullpage {
             }
             let dir = this.opts.dir;
             let sub = (this.direction =
-                dir === "v"
-                    ? (e.pageY - this.startY) / this.height
-                    : (e.pageX - this.startX) / this.width);
+                dir === "v" ?
+                (e.pageY - this.startY) / this.height :
+                (e.pageX - this.startX) / this.width);
             let der = sub > this.opts.der ? -1 : sub < -this.opts.der ? 1 : 0;
             let curIndex = der + this.curIndex;
             this.moveTo(curIndex, true);
@@ -186,9 +188,9 @@ class Fullpage {
             debounce = true;
         // fixed firefox DOMMouseScroll closed #1.
         let mousewheelType =
-            document.mozFullScreen !== undefined
-                ? "DOMMouseScroll"
-                : "mousewheel";
+            document.mozFullScreen !== undefined ?
+            "DOMMouseScroll" :
+            "mousewheel";
 
         addEventListener(el, mousewheelType, e => {
             if (this.opts.movingFlag) {
@@ -206,7 +208,7 @@ class Fullpage {
             // Compatible DOMMouseScroll event.detail
             // see http://www.javascriptkit.com/javatutors/onmousewheel.shtml
             let detail = e.wheelDelta ? e.wheelDelta / 120 : e.detail
-            //let detail = e.detail ? e.detail * -120 : e.wheelDelta;
+                //let detail = e.detail ? e.detail * -120 : e.wheelDelta;
             console.log(e.wheelDelta);
             //Only support Y
             let der = this.direction = detail > 0 ? -1 : detail < 0 ? 1 : 0;
@@ -254,7 +256,8 @@ class Fullpage {
             !Fullpage.iSWhetherEnds(
                 this.pageEles[this.curIndex],
                 this.direction
-            )
+            ) ||
+            (anim && this.disabled === true)
         ) {
             return;
         }
@@ -283,9 +286,9 @@ class Fullpage {
             return false;
         }
         let dist =
-            this.opts.dir === "v"
-                ? curIndex * -this.height
-                : curIndex * -this.width;
+            this.opts.dir === "v" ?
+            curIndex * -this.height :
+            curIndex * -this.width;
 
         this.curIndex = curIndex;
 
@@ -341,6 +344,9 @@ class Fullpage {
         this.total = this.pageEles.length;
         this.resize();
     }
+    setDisabled(disabled) {
+        this.disabled = disabled
+    }
     destroy() {}
 }
 
@@ -351,6 +357,7 @@ function addEventListener(el, eventName, callback, isUseCapture) {
         el.attachEvent("on" + eventName, callback);
     }
 }
+
 function removeEventListener(el, eventName, callback, isUseCapture) {
     if (el.removeEventListener) {
         el.removeEventListener(eventName, callback, !!isUseCapture);
@@ -398,9 +405,13 @@ Fullpage.defaultOptions = {
      *   moving distance >= 100 * der (default:0.1)
      */
     der: 0.1,
+    /**
+    * 
+    * @property {boolean} defualt:false
+    */
     movingFlag: false,
     /**
-     * beforeChange
+     * Callback before change
      * @params
      *     element {Element} current element
      *     currenIndex {Number} current number
@@ -410,7 +421,9 @@ Fullpage.defaultOptions = {
      */
     beforeChange: noop,
     /**
-     * afterChange
+     * Callback after change
+     *
+     * @function 
      * @params
      *     element {Element} current element
      *     currenIndex {Number} current number
@@ -418,6 +431,10 @@ Fullpage.defaultOptions = {
      * @type {Boolean}
      */
     afterChange: noop,
+    /**
+    * Animate class
+    * @property {string}
+    */
     animateClass: "anim",
     /*
      *    There are scroll bars in the page,
@@ -426,7 +443,12 @@ Fullpage.defaultOptions = {
      *    `hidden` ignores the scroll bar in the page
      *   @default hidden 
      */
-    overflow: "hidden"
+    overflow: "hidden",
+    /**
+    * disabled 
+    * @property {boolean}  default: false
+    */
+    disabled: false
 };
 
 function noop() {}

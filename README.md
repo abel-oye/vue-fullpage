@@ -36,6 +36,7 @@ npm install animate.css --save
     `hidden` Hidden overflow
     `scroll` Handling the scroll bars of page
     `auto`  Handling all scroll bars in page,Start checking from triggered elements
+- `disabled` : (default:`false`) 
 
 ### method
 
@@ -47,6 +48,9 @@ Move to the previous page
 
 #### moveNext
  Move to the next page
+
+#### setDisabled
+ Change the value of disabled. A value of true disables move
 
 #### $upadte
 Update the dom structure,for example `v-for` and `v-if` Affect the number of pages, need to manually call `$update`
