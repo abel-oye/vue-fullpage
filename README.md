@@ -52,7 +52,7 @@ Move to the previous page
 #### setDisabled
  Change the value of disabled. A value of true disables move
 
-#### $upadte
+#### $update
 Update the dom structure,for example `v-for` and `v-if` Affect the number of pages, need to manually call `$update`
 
 ```html
@@ -144,7 +144,7 @@ Set the ``page-container`` container's width and height what do you want, and th
 The following settings allow the scrolling page to fill the full screen.
 ```
 <style>
-.page-container {
+.fullpage-container {
   position: absolute;
   left: 0;
   top: 0;
