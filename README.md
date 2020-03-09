@@ -130,7 +130,7 @@ export default {
       }
     }
   },
-  method:{
+  methods:{
     moveNext(){
       this.$refs.example.$fullpage.moveNext(); //Move to the next page
     }
