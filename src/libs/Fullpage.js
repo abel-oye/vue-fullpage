@@ -207,9 +207,9 @@ class Fullpage {
             let dir = this.opts.dir;
             // Compatible DOMMouseScroll event.detail
             // see http://www.javascriptkit.com/javatutors/onmousewheel.shtml
-            let detail = e.wheelDelta ? e.wheelDelta / 120 : e.detail
-                //let detail = e.detail ? e.detail * -120 : e.wheelDelta;
-            console.log(e.wheelDelta);
+            let detail = e.wheelDelta ? e.wheelDelta / 120 : e.detail * -1
+            //let detail = e.detail ? e.detail * -120 : e.wheelDelta;
+
             //Only support Y
             let der = this.direction = detail > 0 ? -1 : detail < 0 ? 1 : 0;
             let curIndex = der + this.curIndex;
