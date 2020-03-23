@@ -1,18 +1,23 @@
 /**
  * vue2.x fullpage
  */
-function broadcast(children, eventName, params, ancestor) {
-    let context;
-    let currentIndex;
-    children &&
-        children.forEach(child => {
-            context = child.context;
-            if (context) {
-                context.$emit.apply(context, [eventName].concat(params));
-            }
-            broadcast(child.children, eventName, params);
-        });
+import {
+    addEventListener,
+    removeEventListener,
+    triggerEvent
+} from './event';
+
+function getCurrentStyle(obj, prop) {
+    if (obj.currentStyle) {
+        return obj.currentStyle[prop];
+    } else if (window.getComputedStyle) {
+        let propprop = prop.replace(/([A-Z])/g, "-$1");
+        propprop = prop.toLowerCase();
+        return document.defaultView.getComputedStyle(obj, null)[prop];
+    }
+    return null;
 }
+
 class Fullpage {
     constructor(el, options, vnode) {
         this.assignOpts(options);
@@ -22,13 +27,17 @@ class Fullpage {
         this.startY = 0;
         this.opts.movingFlag = false;
         this.el = el;
+        this.el.$fullpage = this;
         this.el.classList.add("fullpage-wp");
         this.parentEle = this.el.parentNode;
         this.parentEle.classList.add("fullpage-container");
+
         this.pageEles = this.el.children;
         this.total = this.pageEles.length;
         this.direction = -1;
         this.curIndex = this.opts.start;
+
+        this.preIndex = -1;
 
         this.disabled = !!this.opts.disabled;
 
@@ -55,7 +64,6 @@ class Fullpage {
             pageEle;
         for (; i < length; i++) {
             pageEle = this.pageEles[i];
-            pageEle.setAttribute("data-id", i);
             pageEle.classList.add("page");
             //pageEle.style.width = this.width + 'px'
             pageEle.style.height = this.height + "px";
@@ -70,23 +78,24 @@ class Fullpage {
             this.opts.dir === "v" ?
             this.curIndex * -this.height :
             this.curIndex * -this.width;
+
         this.move(dist);
     }
     setOptions(options) {
         this.assignOpts(options, this.opts);
     }
     toogleAnimate(curIndex) {
-        broadcast(this.vnode.children, "toogle.animate", curIndex);
+        console.log(this.pageEles[curIndex])
+        Fullpage.broadcast([this.pageEles[curIndex]], "toogle.animate", true);
+        Fullpage.broadcast([this.pageEles[this.preIndex]], "toogle.animate", false);
     }
     assignOpts(opts, o) {
-        o = o || Fullpage.defaultOptions;
-        opts = opts || {};
-        for (let key in opts) {
-            if (opts.hasOwnProperty(key)) {
-                o[key] = opts[key];
+        for (var key in Fullpage.defaultOptions) {
+            if (!opts.hasOwnProperty(key)) {
+                opts[key] = Fullpage.defaultOptions[key]
             }
         }
-        this.opts = o;
+        this.opts = opts
     }
     initScrollDirection() {
         if (this.opts.dir !== "v") {
@@ -104,6 +113,7 @@ class Fullpage {
                 this.startX = e.targetTouches[0].pageX;
                 this.startY = e.targetTouches[0].pageY;
             });
+
             addEventListener(el, "touchend", e => {
                 //e.preventDefault();
                 if (this.opts.movingFlag) {
@@ -122,6 +132,7 @@ class Fullpage {
                 let curIndex = der + this.curIndex;
                 this.moveTo(curIndex, true);
             });
+
             addEventListener(document.body, "touchmove", e => {
                 let {
                     overflow
@@ -155,6 +166,7 @@ class Fullpage {
                 }
             });
         }
+
         //else {
         let isMousedown = false;
         addEventListener(el, "mousedown", e => {
@@ -165,19 +177,24 @@ class Fullpage {
             this.startX = e.pageX;
             this.startY = e.pageY;
         });
+
         addEventListener(el, "mouseup", e => {
             isMousedown = false;
         });
+
         addEventListener(el, "mousemove", e => {
+            // @TODO The same direction requires the last slide to bubble
             //e.preventDefault();
             if (this.opts.movingFlag || !isMousedown) {
                 return false;
             }
+
             let dir = this.opts.dir;
             let sub = (this.direction =
                 dir === "v" ?
                 (e.pageY - this.startY) / this.height :
                 (e.pageX - this.startX) / this.width);
+
             let der = sub > this.opts.der ? -1 : sub < -this.opts.der ? 1 : 0;
             let curIndex = der + this.curIndex;
             this.moveTo(curIndex, true);
@@ -208,7 +225,7 @@ class Fullpage {
             // Compatible DOMMouseScroll event.detail
             // see http://www.javascriptkit.com/javatutors/onmousewheel.shtml
             let detail = e.wheelDelta ? e.wheelDelta / 120 : e.detail * -1
-            //let detail = e.detail ? e.detail * -120 : e.wheelDelta;
+                //let detail = e.detail ? e.detail * -120 : e.wheelDelta;
 
             //Only support Y
             let der = this.direction = detail > 0 ? -1 : detail < 0 ? 1 : 0;
@@ -282,6 +299,7 @@ class Fullpage {
             this.curIndex,
             curIndex
         );
+
         if (flag === false) {
             return false;
         }
@@ -290,6 +308,7 @@ class Fullpage {
             curIndex * -this.height :
             curIndex * -this.width;
 
+        this.preIndex = this.curIndex;
         this.curIndex = curIndex;
 
         let fired = false;
@@ -350,33 +369,6 @@ class Fullpage {
     destroy() {}
 }
 
-function addEventListener(el, eventName, callback, isUseCapture) {
-    if (el.addEventListener) {
-        el.addEventListener(eventName, callback, !!isUseCapture);
-    } else {
-        el.attachEvent("on" + eventName, callback);
-    }
-}
-
-function removeEventListener(el, eventName, callback, isUseCapture) {
-    if (el.removeEventListener) {
-        el.removeEventListener(eventName, callback, !!isUseCapture);
-    } else {
-        el.detachEvent("on" + eventName, callback);
-    }
-}
-
-function getCurrentStyle(obj, prop) {
-    if (obj.currentStyle) {
-        return obj.currentStyle[prop];
-    } else if (window.getComputedStyle) {
-        let propprop = prop.replace(/([A-Z])/g, "-$1");
-        propprop = prop.toLowerCase();
-        return document.defaultView.getComputedStyle(obj, null)[prop];
-    }
-    return null;
-}
-
 Fullpage.iSWhetherEnds = (target, direction) => {
     if (direction < 0) {
         return target.scrollTop <= 0;
@@ -388,13 +380,41 @@ Fullpage.iSWhetherEnds = (target, direction) => {
     }
 };
 
+Fullpage.broadcast = (elements, eventName, isShow, ancestor) => {
+
+    if (elements) {
+        elements = Array.prototype.slice.call(elements, 0)
+
+        elements.forEach((ele) => {
+            if (ele) {
+                // Non cross level broadcast
+                if (ele.classList.contains('fullpage-container')) {
+                    if(isShow){
+                        let $fullpage = ele.querySelector('.fullpage-wp').$fullpage;
+                        console.log(2222)
+                        if($fullpage){
+                            $fullpage.toogleAnimate($fullpage.curIndex)
+                        }
+                    }
+                }else{
+                    console.log(ele)
+                    ele.dispatchEvent(triggerEvent(eventName, isShow))
+                    Fullpage.broadcast(ele.children, eventName, isShow);
+                }
+            }
+
+        })
+    }
+}
+
 Fullpage.defaultOptions = {
     start: 0,
     duration: 500,
     loop: false,
     /**
      * direction
-     *
+     * h: horizontal
+     * v: vertical
      */
     dir: "v",
     /**
@@ -406,9 +426,9 @@ Fullpage.defaultOptions = {
      */
     der: 0.1,
     /**
-    * 
-    * @property {boolean} defualt:false
-    */
+     * 
+     * @property {boolean} defualt:false
+     */
     movingFlag: false,
     /**
      * Callback before change
@@ -432,9 +452,9 @@ Fullpage.defaultOptions = {
      */
     afterChange: noop,
     /**
-    * Animate class
-    * @property {string}
-    */
+     * Animate class
+     * @property {string}
+     */
     animateClass: "anim",
     /*
      *    There are scroll bars in the page,
@@ -445,11 +465,12 @@ Fullpage.defaultOptions = {
      */
     overflow: "hidden",
     /**
-    * disabled 
-    * @property {boolean}  default: false
-    */
+     * disabled 
+     * @property {boolean}  default: false
+     */
     disabled: false
 };
 
 function noop() {}
+
 export default Fullpage;

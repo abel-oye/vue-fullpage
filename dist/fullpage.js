@@ -4,6 +4,29 @@
 	(global.fullpage = factory());
 }(this, (function () { 'use strict';
 
+var addEventListener = function addEventListener(el, eventName, callback, isUseCapture) {
+    if (el.addEventListener) {
+        el.addEventListener(eventName, callback, !!isUseCapture);
+    } else {
+        el.attachEvent("on" + eventName, callback);
+    }
+};
+
+var removeEventListener = function removeEventListener(el, eventName, callback, isUseCapture) {
+    if (el.removeEventListener) {
+        el.removeEventListener(eventName, callback, !!isUseCapture);
+    } else {
+        el.detachEvent("on" + eventName, callback);
+    }
+};
+
+var triggerEvent = function triggerEvent(eventName, value) {
+    var event = document.createEvent('HTMLEvents');
+    event.initEvent(eventName, false, true);
+    event.value = value;
+    return event;
+};
+
 var classCallCheck = function (instance, Constructor) {
   if (!(instance instanceof Constructor)) {
     throw new TypeError("Cannot call a class as a function");
@@ -31,16 +54,15 @@ var createClass = function () {
 /**
  * vue2.x fullpage
  */
-function broadcast(children, eventName, params, ancestor) {
-    var context = void 0;
-    var currentIndex = void 0;
-    children && children.forEach(function (child) {
-        context = child.context;
-        if (context) {
-            context.$emit.apply(context, [eventName].concat(params));
-        }
-        broadcast(child.children, eventName, params);
-    });
+function getCurrentStyle(obj, prop) {
+    if (obj.currentStyle) {
+        return obj.currentStyle[prop];
+    } else if (window.getComputedStyle) {
+        var propprop = prop.replace(/([A-Z])/g, "-$1");
+        propprop = prop.toLowerCase();
+        return document.defaultView.getComputedStyle(obj, null)[prop];
+    }
+    return null;
 }
 
 var Fullpage = function () {
@@ -56,13 +78,17 @@ var Fullpage = function () {
         this.startY = 0;
         this.opts.movingFlag = false;
         this.el = el;
+        this.el.$fullpage = this;
         this.el.classList.add("fullpage-wp");
         this.parentEle = this.el.parentNode;
         this.parentEle.classList.add("fullpage-container");
+
         this.pageEles = this.el.children;
         this.total = this.pageEles.length;
         this.direction = -1;
         this.curIndex = this.opts.start;
+
+        this.preIndex = -1;
 
         this.disabled = !!this.opts.disabled;
 
@@ -92,7 +118,6 @@ var Fullpage = function () {
                 pageEle = void 0;
             for (; i < length; i++) {
                 pageEle = this.pageEles[i];
-                pageEle.setAttribute("data-id", i);
                 pageEle.classList.add("page");
                 //pageEle.style.width = this.width + 'px'
                 pageEle.style.height = this.height + "px";
@@ -106,6 +131,7 @@ var Fullpage = function () {
                 return;
             }
             var dist = this.opts.dir === "v" ? this.curIndex * -this.height : this.curIndex * -this.width;
+
             this.move(dist);
         }
     }, {
@@ -116,19 +142,19 @@ var Fullpage = function () {
     }, {
         key: "toogleAnimate",
         value: function toogleAnimate(curIndex) {
-            broadcast(this.vnode.children, "toogle.animate", curIndex);
+            console.log(this.pageEles[curIndex]);
+            Fullpage.broadcast([this.pageEles[curIndex]], "toogle.animate", true);
+            Fullpage.broadcast([this.pageEles[this.preIndex]], "toogle.animate", false);
         }
     }, {
         key: "assignOpts",
         value: function assignOpts(opts, o) {
-            o = o || Fullpage.defaultOptions;
-            opts = opts || {};
-            for (var key in opts) {
-                if (opts.hasOwnProperty(key)) {
-                    o[key] = opts[key];
+            for (var key in Fullpage.defaultOptions) {
+                if (!opts.hasOwnProperty(key)) {
+                    opts[key] = Fullpage.defaultOptions[key];
                 }
             }
-            this.opts = o;
+            this.opts = opts;
         }
     }, {
         key: "initScrollDirection",
@@ -152,6 +178,7 @@ var Fullpage = function () {
                     _this2.startX = e.targetTouches[0].pageX;
                     _this2.startY = e.targetTouches[0].pageY;
                 });
+
                 addEventListener(el, "touchend", function (e) {
                     //e.preventDefault();
                     if (_this2.opts.movingFlag) {
@@ -164,6 +191,7 @@ var Fullpage = function () {
                     var curIndex = der + _this2.curIndex;
                     _this2.moveTo(curIndex, true);
                 });
+
                 addEventListener(document.body, "touchmove", function (e) {
                     var overflow = _this2.opts.overflow;
 
@@ -188,6 +216,7 @@ var Fullpage = function () {
                     }
                 });
             }
+
             //else {
             var isMousedown = false;
             addEventListener(el, "mousedown", function (e) {
@@ -198,16 +227,21 @@ var Fullpage = function () {
                 _this2.startX = e.pageX;
                 _this2.startY = e.pageY;
             });
+
             addEventListener(el, "mouseup", function (e) {
                 isMousedown = false;
             });
+
             addEventListener(el, "mousemove", function (e) {
+                // @TODO The same direction requires the last slide to bubble
                 //e.preventDefault();
                 if (_this2.opts.movingFlag || !isMousedown) {
                     return false;
                 }
+
                 var dir = _this2.opts.dir;
                 var sub = _this2.direction = dir === "v" ? (e.pageY - _this2.startY) / _this2.height : (e.pageX - _this2.startX) / _this2.width;
+
                 var der = sub > _this2.opts.der ? -1 : sub < -_this2.opts.der ? 1 : 0;
                 var curIndex = der + _this2.curIndex;
                 _this2.moveTo(curIndex, true);
@@ -293,11 +327,13 @@ var Fullpage = function () {
             }
             //beforeChange return false cancel slide
             var flag = this.opts.beforeChange.call(this, this.pageEles[this.curIndex], this.curIndex, curIndex);
+
             if (flag === false) {
                 return false;
             }
             var dist = this.opts.dir === "v" ? curIndex * -this.height : curIndex * -this.width;
 
+            this.preIndex = this.curIndex;
             this.curIndex = curIndex;
 
             var fired = false;
@@ -358,33 +394,6 @@ var Fullpage = function () {
     return Fullpage;
 }();
 
-function addEventListener(el, eventName, callback, isUseCapture) {
-    if (el.addEventListener) {
-        el.addEventListener(eventName, callback, !!isUseCapture);
-    } else {
-        el.attachEvent("on" + eventName, callback);
-    }
-}
-
-function removeEventListener(el, eventName, callback, isUseCapture) {
-    if (el.removeEventListener) {
-        el.removeEventListener(eventName, callback, !!isUseCapture);
-    } else {
-        el.detachEvent("on" + eventName, callback);
-    }
-}
-
-function getCurrentStyle(obj, prop) {
-    if (obj.currentStyle) {
-        return obj.currentStyle[prop];
-    } else if (window.getComputedStyle) {
-        var propprop = prop.replace(/([A-Z])/g, "-$1");
-        propprop = prop.toLowerCase();
-        return document.defaultView.getComputedStyle(obj, null)[prop];
-    }
-    return null;
-}
-
 Fullpage.iSWhetherEnds = function (target, direction) {
     if (direction < 0) {
         return target.scrollTop <= 0;
@@ -396,13 +405,40 @@ Fullpage.iSWhetherEnds = function (target, direction) {
     }
 };
 
+Fullpage.broadcast = function (elements, eventName, isShow, ancestor) {
+
+    if (elements) {
+        elements = Array.prototype.slice.call(elements, 0);
+
+        elements.forEach(function (ele) {
+            if (ele) {
+                // Non cross level broadcast
+                if (ele.classList.contains('fullpage-container')) {
+                    if (isShow) {
+                        var $fullpage = ele.querySelector('.fullpage-wp').$fullpage;
+                        console.log(2222);
+                        if ($fullpage) {
+                            $fullpage.toogleAnimate($fullpage.curIndex);
+                        }
+                    }
+                } else {
+                    console.log(ele);
+                    ele.dispatchEvent(triggerEvent(eventName, isShow));
+                    Fullpage.broadcast(ele.children, eventName, isShow);
+                }
+            }
+        });
+    }
+};
+
 Fullpage.defaultOptions = {
     start: 0,
     duration: 500,
     loop: false,
     /**
      * direction
-     *
+     * h: horizontal
+     * v: vertical
      */
     dir: "v",
     /**
@@ -414,9 +450,9 @@ Fullpage.defaultOptions = {
      */
     der: 0.1,
     /**
-    * 
-    * @property {boolean} defualt:false
-    */
+     * 
+     * @property {boolean} defualt:false
+     */
     movingFlag: false,
     /**
      * Callback before change
@@ -440,9 +476,9 @@ Fullpage.defaultOptions = {
      */
     afterChange: noop,
     /**
-    * Animate class
-    * @property {string}
-    */
+     * Animate class
+     * @property {string}
+     */
     animateClass: "anim",
     /*
      *    There are scroll bars in the page,
@@ -453,9 +489,9 @@ Fullpage.defaultOptions = {
      */
     overflow: "hidden",
     /**
-    * disabled 
-    * @property {boolean}  default: false
-    */
+     * disabled 
+     * @property {boolean}  default: false
+     */
     disabled: false
 };
 
@@ -467,13 +503,12 @@ var Animate = function () {
 
 		classCallCheck(this, Animate);
 
-		var vm = vnode.context,
-		    aminate = binding.value;
+		var aminate = binding.value;
 
-		el.style.opacity = "0";
-		vm.$on("toogle.animate", function (curIndex) {
-			var curPage = _this.getClosestId(el.parentNode);
-			if (curIndex === curPage) {
+		addEventListener(el, "toogle.animate", function (_ref) {
+			var value = _ref.value;
+
+			if (value) {
 				_this.addAnimated(el, aminate);
 			} else {
 				el.style.opacity = "0";
@@ -483,19 +518,6 @@ var Animate = function () {
 	}
 
 	createClass(Animate, [{
-		key: "getClosestId",
-		value: function getClosestId(elem) {
-			var id = void 0;
-			while (elem && elem.nodeType !== 9) {
-				id = +elem.getAttribute("data-id");
-				if (id) {
-					break;
-				}
-				elem = elem.parentNode;
-			}
-			return id;
-		}
-	}, {
 		key: "addAnimated",
 		value: function addAnimated(el, animate) {
 			var delay = animate.delay || 0;
