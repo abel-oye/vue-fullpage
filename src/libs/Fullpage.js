@@ -2,8 +2,8 @@
  * vue2.x fullpage
  */
 import {
-    addEventListener,
-    removeEventListener,
+    on,
+    off,
     triggerEvent
 } from './event';
 
@@ -18,6 +18,11 @@ function getCurrentStyle(obj, prop) {
     return null;
 }
 
+function slice(...args) {
+    const [that, ...other] = args;
+    return Array.prototype.slice.apply(that, other)
+}
+
 class Fullpage {
     constructor(el, options, vnode) {
         this.assignOpts(options);
@@ -28,7 +33,7 @@ class Fullpage {
         this.opts.movingFlag = false;
         this.el = el;
         this.el.$fullpage = this;
-        this.el.classList.add("fullpage-wp");
+        this.el.classList.add(this.opts.classPrefix);
         this.parentEle = this.el.parentNode;
         this.parentEle.classList.add("fullpage-container");
 
@@ -44,21 +49,19 @@ class Fullpage {
         this.initScrollDirection();
         this.initEvent(el);
         window.setTimeout(() => {
+            console.log('init',this)
             this.resize();
+            var startIndex = this.opts.start;
             //The first page triggers the animation directly
-            this.moveTo(this.opts.start, false);
-            this.toogleAnimate(this.opts.start);
-            this.curIndex = this.opts.start;
+            this.moveTo(startIndex, false);
+            this.toogleAnimate(startIndex, true);
+            this.curIndex = startIndex;
         }, 0);
-
-        addEventListener(window, "resize", () => {
-            this.resize();
-            this.correct();
-        });
     }
     resize() {
         this.width = this.opts.width || this.el.offsetWidth;
         this.height = this.opts.height || this.el.offsetHeight;
+
         let i = 0,
             length = this.pageEles.length,
             pageEle;
@@ -74,20 +77,31 @@ class Fullpage {
         if (this.current === 0) {
             return;
         }
-        let dist =
-            this.opts.dir === "v" ?
-            this.curIndex * -this.height :
-            this.curIndex * -this.width;
+
+        let dist = this.curIndex * (this.opts.dir === "v" ? -this.height : -this.width);
 
         this.move(dist);
     }
     setOptions(options) {
-        this.assignOpts(options, this.opts);
-    }
-    toogleAnimate(curIndex) {
-        console.log(this.pageEles[curIndex])
-        Fullpage.broadcast([this.pageEles[curIndex]], "toogle.animate", true);
-        Fullpage.broadcast([this.pageEles[this.preIndex]], "toogle.animate", false);
+            this.assignOpts(options, this.opts);
+        }
+        /** 
+         * 切换动画
+         * @param {Number} curIndex
+         * @param {Boolean} isAll 是否是其他全部。默认只是关闭上一次，初始时需关闭所有
+         */
+    toogleAnimate(curIndex, isAll) {
+        var exitElements = slice(this.pageEles, this.preIndex, this.preIndex + 1);
+
+        if (isAll) {
+            exitElements = slice(this.pageEles, 0).filter(function(_, index) {
+                return index != curIndex
+            })
+        }
+
+        Fullpage.broadcast(slice(this.pageEles, curIndex, curIndex + 1), "toogle.animate", true);
+        Fullpage.broadcast(exitElements, "toogle.animate", false);
+
     }
     assignOpts(opts, o) {
         for (var key in Fullpage.defaultOptions) {
@@ -99,14 +113,23 @@ class Fullpage {
     }
     initScrollDirection() {
         if (this.opts.dir !== "v") {
-            this.el.classList.add("fullpage-wp-h");
+            this.el.classList.add(this.opts.classPrefix + "-h");
         }
+    }
+    destroy() {
+
     }
     initEvent(el) {
         this.prevIndex = this.curIndex;
+
+        on(window, "resize", () => {
+            this.resize();
+            this.correct();
+        });
+
         if ("ontouchstart" in document) {
             /// touch ///
-            addEventListener(el, "touchstart", e => {
+            on(el, "touchstart", e => {
                 if (this.opts.movingFlag) {
                     return false;
                 }
@@ -114,7 +137,7 @@ class Fullpage {
                 this.startY = e.targetTouches[0].pageY;
             });
 
-            addEventListener(el, "touchend", e => {
+            on(el, "touchend", e => {
                 //e.preventDefault();
                 if (this.opts.movingFlag) {
                     return false;
@@ -133,7 +156,7 @@ class Fullpage {
                 this.moveTo(curIndex, true);
             });
 
-            addEventListener(document.body, "touchmove", e => {
+            on(document.body, "touchmove", e => {
                 let {
                     overflow
                 } = this.opts;
@@ -169,7 +192,7 @@ class Fullpage {
 
         //else {
         let isMousedown = false;
-        addEventListener(el, "mousedown", e => {
+        on(el, "mousedown", e => {
             if (this.opts.movingFlag) {
                 return false;
             }
@@ -178,11 +201,11 @@ class Fullpage {
             this.startY = e.pageY;
         });
 
-        addEventListener(el, "mouseup", e => {
+        on(el, "mouseup", e => {
             isMousedown = false;
         });
 
-        addEventListener(el, "mousemove", e => {
+        on(el, "mousemove", e => {
             // @TODO The same direction requires the last slide to bubble
             //e.preventDefault();
             if (this.opts.movingFlag || !isMousedown) {
@@ -209,7 +232,7 @@ class Fullpage {
             "DOMMouseScroll" :
             "mousewheel";
 
-        addEventListener(el, mousewheelType, e => {
+        on(el, mousewheelType, e => {
             if (this.opts.movingFlag) {
                 return false;
             }
@@ -241,7 +264,7 @@ class Fullpage {
         });
         //}
 
-        addEventListener(window, "resize", () => {
+        on(window, "resize", () => {
             if (el.offsetHeight != this.height) {
                 this.resize();
             }
@@ -314,7 +337,7 @@ class Fullpage {
         let fired = false;
 
         let wrappedCallback = () => {
-            removeEventListener(
+            off(
                 this.el,
                 "webkitTransitionEnd",
                 wrappedCallback
@@ -334,14 +357,14 @@ class Fullpage {
             this.opts.movingFlag = true;
 
             let transition = getCurrentStyle(
-                document.querySelector(".fullpage-wp"),
+                document.querySelector("." + this.opts.classPrefix),
                 "transition"
             );
 
             let duration =
                 this.opts.duration || parseFloat(transition.split(" ")[1]) || 0;
 
-            addEventListener(this.el, "webkitTransitionEnd", wrappedCallback);
+            on(this.el, "webkitTransitionEnd", wrappedCallback);
 
             setTimeout(() => {
                 if (fired) return;
@@ -381,23 +404,19 @@ Fullpage.iSWhetherEnds = (target, direction) => {
 };
 
 Fullpage.broadcast = (elements, eventName, isShow, ancestor) => {
-
+    elements = slice(elements, 0)
     if (elements) {
-        elements = Array.prototype.slice.call(elements, 0)
-
         elements.forEach((ele) => {
             if (ele) {
                 // Non cross level broadcast
-                if (ele.classList.contains('fullpage-container')) {
-                    if(isShow){
+                if (ele.classList.contains('fullpage-container') && isShow) {
+                    if (isShow) {
                         let $fullpage = ele.querySelector('.fullpage-wp').$fullpage;
-                        console.log(2222)
-                        if($fullpage){
-                            $fullpage.toogleAnimate($fullpage.curIndex)
+                        if ($fullpage) {
+                            $fullpage.toogleAnimate($fullpage.curIndex, true)
                         }
                     }
-                }else{
-                    console.log(ele)
+                } else {
                     ele.dispatchEvent(triggerEvent(eventName, isShow))
                     Fullpage.broadcast(ele.children, eventName, isShow);
                 }
@@ -468,7 +487,8 @@ Fullpage.defaultOptions = {
      * disabled 
      * @property {boolean}  default: false
      */
-    disabled: false
+    disabled: false,
+    classPrefix: 'fullpage-wp'
 };
 
 function noop() {}

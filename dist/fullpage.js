@@ -4,7 +4,7 @@
 	(global.fullpage = factory());
 }(this, (function () { 'use strict';
 
-var addEventListener = function addEventListener(el, eventName, callback, isUseCapture) {
+var on = function on(el, eventName, callback, isUseCapture) {
     if (el.addEventListener) {
         el.addEventListener(eventName, callback, !!isUseCapture);
     } else {
@@ -12,7 +12,7 @@ var addEventListener = function addEventListener(el, eventName, callback, isUseC
     }
 };
 
-var removeEventListener = function removeEventListener(el, eventName, callback, isUseCapture) {
+var off = function off(el, eventName, callback, isUseCapture) {
     if (el.removeEventListener) {
         el.removeEventListener(eventName, callback, !!isUseCapture);
     } else {
@@ -65,6 +65,17 @@ function getCurrentStyle(obj, prop) {
     return null;
 }
 
+function slice() {
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+    }
+
+    var that = args[0],
+        other = args.slice(1);
+
+    return Array.prototype.slice.apply(that, other);
+}
+
 var Fullpage = function () {
     function Fullpage(el, options, vnode) {
         var _this = this;
@@ -79,7 +90,7 @@ var Fullpage = function () {
         this.opts.movingFlag = false;
         this.el = el;
         this.el.$fullpage = this;
-        this.el.classList.add("fullpage-wp");
+        this.el.classList.add(this.opts.classPrefix);
         this.parentEle = this.el.parentNode;
         this.parentEle.classList.add("fullpage-container");
 
@@ -95,17 +106,14 @@ var Fullpage = function () {
         this.initScrollDirection();
         this.initEvent(el);
         window.setTimeout(function () {
+            console.log('init', _this);
             _this.resize();
+            var startIndex = _this.opts.start;
             //The first page triggers the animation directly
-            _this.moveTo(_this.opts.start, false);
-            _this.toogleAnimate(_this.opts.start);
-            _this.curIndex = _this.opts.start;
+            _this.moveTo(startIndex, false);
+            _this.toogleAnimate(startIndex, true);
+            _this.curIndex = startIndex;
         }, 0);
-
-        addEventListener(window, "resize", function () {
-            _this.resize();
-            _this.correct();
-        });
     }
 
     createClass(Fullpage, [{
@@ -113,6 +121,7 @@ var Fullpage = function () {
         value: function resize() {
             this.width = this.opts.width || this.el.offsetWidth;
             this.height = this.opts.height || this.el.offsetHeight;
+
             var i = 0,
                 length = this.pageEles.length,
                 pageEle = void 0;
@@ -130,7 +139,8 @@ var Fullpage = function () {
             if (this.current === 0) {
                 return;
             }
-            var dist = this.opts.dir === "v" ? this.curIndex * -this.height : this.curIndex * -this.width;
+
+            var dist = this.curIndex * (this.opts.dir === "v" ? -this.height : -this.width);
 
             this.move(dist);
         }
@@ -139,12 +149,25 @@ var Fullpage = function () {
         value: function setOptions(options) {
             this.assignOpts(options, this.opts);
         }
+        /** 
+         * 切换动画
+         * @param {Number} curIndex
+         * @param {Boolean} isAll 是否是其他全部。默认只是关闭上一次，初始时需关闭所有
+         */
+
     }, {
         key: "toogleAnimate",
-        value: function toogleAnimate(curIndex) {
-            console.log(this.pageEles[curIndex]);
-            Fullpage.broadcast([this.pageEles[curIndex]], "toogle.animate", true);
-            Fullpage.broadcast([this.pageEles[this.preIndex]], "toogle.animate", false);
+        value: function toogleAnimate(curIndex, isAll) {
+            var exitElements = slice(this.pageEles, this.preIndex, this.preIndex + 1);
+
+            if (isAll) {
+                exitElements = slice(this.pageEles, 0).filter(function (_, index) {
+                    return index != curIndex;
+                });
+            }
+
+            Fullpage.broadcast(slice(this.pageEles, curIndex, curIndex + 1), "toogle.animate", true);
+            Fullpage.broadcast(exitElements, "toogle.animate", false);
         }
     }, {
         key: "assignOpts",
@@ -160,18 +183,27 @@ var Fullpage = function () {
         key: "initScrollDirection",
         value: function initScrollDirection() {
             if (this.opts.dir !== "v") {
-                this.el.classList.add("fullpage-wp-h");
+                this.el.classList.add(this.opts.classPrefix + "-h");
             }
         }
+    }, {
+        key: "destroy",
+        value: function destroy() {}
     }, {
         key: "initEvent",
         value: function initEvent(el) {
             var _this2 = this;
 
             this.prevIndex = this.curIndex;
+
+            on(window, "resize", function () {
+                _this2.resize();
+                _this2.correct();
+            });
+
             if ("ontouchstart" in document) {
                 /// touch ///
-                addEventListener(el, "touchstart", function (e) {
+                on(el, "touchstart", function (e) {
                     if (_this2.opts.movingFlag) {
                         return false;
                     }
@@ -179,7 +211,7 @@ var Fullpage = function () {
                     _this2.startY = e.targetTouches[0].pageY;
                 });
 
-                addEventListener(el, "touchend", function (e) {
+                on(el, "touchend", function (e) {
                     //e.preventDefault();
                     if (_this2.opts.movingFlag) {
                         return false;
@@ -192,7 +224,7 @@ var Fullpage = function () {
                     _this2.moveTo(curIndex, true);
                 });
 
-                addEventListener(document.body, "touchmove", function (e) {
+                on(document.body, "touchmove", function (e) {
                     var overflow = _this2.opts.overflow;
 
 
@@ -219,7 +251,7 @@ var Fullpage = function () {
 
             //else {
             var isMousedown = false;
-            addEventListener(el, "mousedown", function (e) {
+            on(el, "mousedown", function (e) {
                 if (_this2.opts.movingFlag) {
                     return false;
                 }
@@ -228,11 +260,11 @@ var Fullpage = function () {
                 _this2.startY = e.pageY;
             });
 
-            addEventListener(el, "mouseup", function (e) {
+            on(el, "mouseup", function (e) {
                 isMousedown = false;
             });
 
-            addEventListener(el, "mousemove", function (e) {
+            on(el, "mousemove", function (e) {
                 // @TODO The same direction requires the last slide to bubble
                 //e.preventDefault();
                 if (_this2.opts.movingFlag || !isMousedown) {
@@ -253,7 +285,7 @@ var Fullpage = function () {
             // fixed firefox DOMMouseScroll closed #1.
             var mousewheelType = document.mozFullScreen !== undefined ? "DOMMouseScroll" : "mousewheel";
 
-            addEventListener(el, mousewheelType, function (e) {
+            on(el, mousewheelType, function (e) {
                 if (_this2.opts.movingFlag) {
                     return false;
                 }
@@ -285,7 +317,7 @@ var Fullpage = function () {
             });
             //}
 
-            addEventListener(window, "resize", function () {
+            on(window, "resize", function () {
                 if (el.offsetHeight != _this2.height) {
                     _this2.resize();
                 }
@@ -339,7 +371,7 @@ var Fullpage = function () {
             var fired = false;
 
             var wrappedCallback = function wrappedCallback() {
-                removeEventListener(_this3.el, "webkitTransitionEnd", wrappedCallback);
+                off(_this3.el, "webkitTransitionEnd", wrappedCallback);
                 _this3.toogleAnimate(_this3.curIndex);
                 _this3.opts.afterChange.call(_this3, _this3.pageEles[_this3.curIndex], _this3.curIndex);
                 _this3.opts.movingFlag = false;
@@ -350,11 +382,11 @@ var Fullpage = function () {
                 this.el.classList.add(this.opts.animateClass);
                 this.opts.movingFlag = true;
 
-                var transition = getCurrentStyle(document.querySelector(".fullpage-wp"), "transition");
+                var transition = getCurrentStyle(document.querySelector("." + this.opts.classPrefix), "transition");
 
                 var duration = this.opts.duration || parseFloat(transition.split(" ")[1]) || 0;
 
-                addEventListener(this.el, "webkitTransitionEnd", wrappedCallback);
+                on(this.el, "webkitTransitionEnd", wrappedCallback);
 
                 setTimeout(function () {
                     if (fired) return;
@@ -406,23 +438,19 @@ Fullpage.iSWhetherEnds = function (target, direction) {
 };
 
 Fullpage.broadcast = function (elements, eventName, isShow, ancestor) {
-
+    elements = slice(elements, 0);
     if (elements) {
-        elements = Array.prototype.slice.call(elements, 0);
-
         elements.forEach(function (ele) {
             if (ele) {
                 // Non cross level broadcast
-                if (ele.classList.contains('fullpage-container')) {
+                if (ele.classList.contains('fullpage-container') && isShow) {
                     if (isShow) {
                         var $fullpage = ele.querySelector('.fullpage-wp').$fullpage;
-                        console.log(2222);
                         if ($fullpage) {
-                            $fullpage.toogleAnimate($fullpage.curIndex);
+                            $fullpage.toogleAnimate($fullpage.curIndex, true);
                         }
                     }
                 } else {
-                    console.log(ele);
                     ele.dispatchEvent(triggerEvent(eventName, isShow));
                     Fullpage.broadcast(ele.children, eventName, isShow);
                 }
@@ -492,51 +520,57 @@ Fullpage.defaultOptions = {
      * disabled 
      * @property {boolean}  default: false
      */
-    disabled: false
+    disabled: false,
+    classPrefix: 'fullpage-wp'
 };
 
 function noop() {}
 
 var Animate = function () {
-	function Animate(el, binding, vnode) {
-		var _this = this;
+    function Animate(el, binding, vnode) {
+        var _this = this;
 
-		classCallCheck(this, Animate);
+        classCallCheck(this, Animate);
 
-		var aminate = binding.value;
+        var aminate = binding.value;
 
-		addEventListener(el, "toogle.animate", function (_ref) {
-			var value = _ref.value;
+        el.style.opacity = "0";
+        this.removeAnimated(el, aminate);
 
-			if (value) {
-				_this.addAnimated(el, aminate);
-			} else {
-				el.style.opacity = "0";
-				_this.removeAnimated(el, aminate);
-			}
-		});
-	}
+        on(el, "toogle.animate", function (_ref) {
+            var value = _ref.value;
 
-	createClass(Animate, [{
-		key: "addAnimated",
-		value: function addAnimated(el, animate) {
-			var delay = animate.delay || 0;
-			el.classList.add("animated");
-			window.setTimeout(function () {
-				el.style.opacity = "1";
-				el.classList.add(animate.value);
-			}, delay);
-		}
-	}, {
-		key: "removeAnimated",
-		value: function removeAnimated(el, animate) {
-			var cls = el.getAttribute("class");
-			if (cls && cls.indexOf("animated") > -1) {
-				el.classList.remove(animate.value);
-			}
-		}
-	}]);
-	return Animate;
+            if (value) {
+                _this.addAnimated(el, aminate);
+            } else {
+                setTimeout(function () {
+                    _this.removeAnimated(el, aminate);
+                });
+            }
+        });
+    }
+
+    createClass(Animate, [{
+        key: "addAnimated",
+        value: function addAnimated(el, animate) {
+            var delay = animate.delay || 0;
+            el.classList.add("animated");
+            window.setTimeout(function () {
+                // el.style.animationDelay = delay +'s'
+                el.style.opacity = "1";
+                el.classList.add(animate.value);
+            }, delay);
+        }
+    }, {
+        key: "removeAnimated",
+        value: function removeAnimated(el, animate) {
+            el.style.opacity = "0";
+            if (el.classList.contains("animated")) {
+                el.classList.remove(animate.value);
+            }
+        }
+    }]);
+    return Animate;
 }();
 
 var fullpage = {
@@ -554,10 +588,12 @@ var fullpage = {
 				};
 			},
 			componentUpdated: function componentUpdated(el, binding, vnode) {
-
 				var opts = binding.value || {};
 				var that = el.$fullpage;
 				that.setOptions(opts);
+			},
+			unbind: function unbind(el) {
+				el.$fullpage.destroy();
 			}
 		});
 

@@ -1,4 +1,4 @@
-export const addEventListener = (el, eventName, callback, isUseCapture) => {
+export const on = (el, eventName, callback, isUseCapture) => {
     if (el.addEventListener) {
         el.addEventListener(eventName, callback, !!isUseCapture);
     } else {
@@ -6,7 +6,7 @@ export const addEventListener = (el, eventName, callback, isUseCapture) => {
     }
 }
 
-export const removeEventListener = (el, eventName, callback, isUseCapture) => {
+export const off = (el, eventName, callback, isUseCapture) => {
     if (el.removeEventListener) {
         el.removeEventListener(eventName, callback, !!isUseCapture);
     } else {

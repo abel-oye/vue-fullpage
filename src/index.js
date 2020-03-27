@@ -16,10 +16,12 @@ let fullpage =  {
 				}
 			},
 			componentUpdated: (el, binding, vnode)=>{
-				
 				var opts = binding.value || {};
 				var that  = el.$fullpage;
 				that.setOptions(opts);
+			},
+			unbind(el){
+				el.$fullpage.destroy()
 			}
 		})
 
