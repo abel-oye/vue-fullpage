@@ -49,7 +49,7 @@ class Fullpage {
         this.initScrollDirection();
         this.initEvent(el);
         window.setTimeout(() => {
-            console.log('init',this)
+            console.log('init', this)
             this.resize();
             var startIndex = this.opts.start;
             //The first page triggers the animation directly
@@ -290,28 +290,34 @@ class Fullpage {
             yPx +
             "px, 0px);";
     }
-    moveTo(curIndex, anim) {
-        if (
-            this.opts.overflow === "scroll" &&
-            !Fullpage.iSWhetherEnds(
-                this.pageEles[this.curIndex],
-                this.direction
-            ) ||
-            (anim && this.disabled === true)
-        ) {
+
+    /**
+     *
+     * @param {Number} moveToIndex Move to index
+     * @param {Boolean} animated Animated move？
+     * @param {Boolean} force Fore move, ignore disable default:false
+     */
+    moveTo(moveToIndex, animated, force) {
+        if (!force && (
+                this.opts.overflow === "scroll" &&
+                !Fullpage.iSWhetherEnds(
+                    this.pageEles[this.curIndex],
+                    this.direction
+                ) ||
+                (animated && this.disabled === true))) {
             return;
         }
 
         // no change
-        if (this.curIndex === curIndex) {
+        if (this.curIndex === moveToIndex) {
             return;
         }
 
-        if (!(curIndex >= 0 && curIndex < this.total)) {
+        if (!(moveToIndex >= 0 && moveToIndex < this.total)) {
             if (!!this.opts.loop) {
-                curIndex = this.curIndex = curIndex < 0 ? this.total - 1 : 0;
+                moveToIndex = this.curIndex = moveToIndex < 0 ? this.total - 1 : 0;
             } else {
-                this.curIndex = curIndex < 0 ? 0 : this.total - 1;
+                this.curIndex = moveToIndex < 0 ? 0 : this.total - 1;
                 return;
             }
         }
@@ -320,7 +326,7 @@ class Fullpage {
             this,
             this.pageEles[this.curIndex],
             this.curIndex,
-            curIndex
+            moveToIndex
         );
 
         if (flag === false) {
@@ -328,11 +334,11 @@ class Fullpage {
         }
         let dist =
             this.opts.dir === "v" ?
-            curIndex * -this.height :
-            curIndex * -this.width;
+            moveToIndex * -this.height :
+            moveToIndex * -this.width;
 
         this.preIndex = this.curIndex;
-        this.curIndex = curIndex;
+        this.curIndex = moveToIndex;
 
         let fired = false;
 
@@ -352,7 +358,7 @@ class Fullpage {
             fired = true;
         };
 
-        if (anim) {
+        if (animated) {
             this.el.classList.add(this.opts.animateClass);
             this.opts.movingFlag = true;
 

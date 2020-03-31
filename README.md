@@ -42,6 +42,15 @@ npm install animate.css --save
 
 #### moveTo
 Move to the specified page
+```js
+  /**
+   *
+   * @param {Number} moveToIndex Move to index
+   * @param {Boolean} animated Animated move？
+   * @param {Boolean} force Fore move default:false
+   */
+  $fullpage.moveTo(1/*move to index*/,false /*animatied*/,true /*force move?*/)
+```
 
 #### movePrev
 Move to the previous page

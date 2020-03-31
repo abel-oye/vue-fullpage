@@ -335,38 +335,46 @@ var Fullpage = function () {
             }
             this.el.style.cssText += ";-webkit-transform : translate3d(" + xPx + "px, " + yPx + "px, 0px);" + "transform : translate3d(" + xPx + "px, " + yPx + "px, 0px);";
         }
+
+        /**
+         *
+         * @param {Number} moveToIndex Move to index
+         * @param {Boolean} animated Animated move？
+         * @param {Boolean} force Fore move default:false
+         */
+
     }, {
         key: "moveTo",
-        value: function moveTo(curIndex, anim) {
+        value: function moveTo(moveToIndex, animated, force) {
             var _this3 = this;
 
-            if (this.opts.overflow === "scroll" && !Fullpage.iSWhetherEnds(this.pageEles[this.curIndex], this.direction) || anim && this.disabled === true) {
+            if (!force && (this.opts.overflow === "scroll" && !Fullpage.iSWhetherEnds(this.pageEles[this.curIndex], this.direction) || animated && this.disabled === true)) {
                 return;
             }
 
             // no change
-            if (this.curIndex === curIndex) {
+            if (this.curIndex === moveToIndex) {
                 return;
             }
 
-            if (!(curIndex >= 0 && curIndex < this.total)) {
+            if (!(moveToIndex >= 0 && moveToIndex < this.total)) {
                 if (!!this.opts.loop) {
-                    curIndex = this.curIndex = curIndex < 0 ? this.total - 1 : 0;
+                    moveToIndex = this.curIndex = moveToIndex < 0 ? this.total - 1 : 0;
                 } else {
-                    this.curIndex = curIndex < 0 ? 0 : this.total - 1;
+                    this.curIndex = moveToIndex < 0 ? 0 : this.total - 1;
                     return;
                 }
             }
             //beforeChange return false cancel slide
-            var flag = this.opts.beforeChange.call(this, this.pageEles[this.curIndex], this.curIndex, curIndex);
+            var flag = this.opts.beforeChange.call(this, this.pageEles[this.curIndex], this.curIndex, moveToIndex);
 
             if (flag === false) {
                 return false;
             }
-            var dist = this.opts.dir === "v" ? curIndex * -this.height : curIndex * -this.width;
+            var dist = this.opts.dir === "v" ? moveToIndex * -this.height : moveToIndex * -this.width;
 
             this.preIndex = this.curIndex;
-            this.curIndex = curIndex;
+            this.curIndex = moveToIndex;
 
             var fired = false;
 
@@ -378,7 +386,7 @@ var Fullpage = function () {
                 fired = true;
             };
 
-            if (anim) {
+            if (animated) {
                 this.el.classList.add(this.opts.animateClass);
                 this.opts.movingFlag = true;
 

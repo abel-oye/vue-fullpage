@@ -36,6 +36,15 @@ npm install animate.css --save
 
 #### moveTo  
  移动到指定页面   
+```js
+  /**
+   *
+   * @param {Number} moveToIndex 移动到指定坐标
+   * @param {Boolean} animated 是否有动画
+   * @param {Boolean} force 是否强制移动，忽略disable
+   */
+  $fullpage.moveTo(1,false ,true)
+```
 
 #### movePrev 
  移动到上一个页面   
