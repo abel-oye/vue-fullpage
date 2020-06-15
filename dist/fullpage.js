@@ -340,7 +340,7 @@ var Fullpage = function () {
          *
          * @param {Number} moveToIndex Move to index
          * @param {Boolean} animated Animated move？
-         * @param {Boolean} force Fore move default:false
+         * @param {Boolean} force Fore move, ignore disable default:false
          */
 
     }, {
