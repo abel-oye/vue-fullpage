@@ -298,6 +298,11 @@ class Fullpage {
      * @param {Boolean} force Fore move, ignore disable default:false
      */
     moveTo(moveToIndex, animated, force) {
+
+        if(!Number.isInteger(moveToIndex)){
+            return
+        }
+        
         if (!force && (
                 this.opts.overflow === "scroll" &&
                 !Fullpage.iSWhetherEnds(

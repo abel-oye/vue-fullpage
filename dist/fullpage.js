@@ -348,6 +348,10 @@ var Fullpage = function () {
         value: function moveTo(moveToIndex, animated, force) {
             var _this3 = this;
 
+            if (!Number.isInteger(moveToIndex)) {
+                return;
+            }
+
             if (!force && (this.opts.overflow === "scroll" && !Fullpage.iSWhetherEnds(this.pageEles[this.curIndex], this.direction) || animated && this.disabled === true)) {
                 return;
             }
